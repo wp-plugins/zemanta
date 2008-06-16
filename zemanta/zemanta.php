@@ -61,7 +61,7 @@ function zem_wp_head() {
 	// Insert Zemanta widget in sidebar
 	$opt_val = get_option( 'zemanta_api_key' );
 
-	print '<script type="text/javascript">window.ZemantaGetAPIKey = function () { return "' . $opt_val . '"; }</script>';
+	print '<script id="zemanta-loader" type="text/javascript">window.ZemantaGetAPIKey = function () { return "' . $opt_val . '"; }</script>';
 	print '<script type="text/javascript" src="http://static.zemanta.com/plugins/wordpress/2.x/loader.js"></script>';
 };
 
