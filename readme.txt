@@ -24,7 +24,7 @@ cURL module in PHP is required for plugin to make calls to web service.
 
 = I see two broken sidebars. What is happening? =
 
-Zemanta browser extension is probably in conflict with WordPress plugin. Turn Zemanta browser extension off when  writing posts on blogs which have Zemanta plugin installed.
+Zemanta browser extension is probably in conflict with WordPress plugin. Upgrade Zemanta WordPress plugin to version 0.2.6 or turn Zemanta browser extension off when  writing posts on blogs which have Zemanta plugin installed.
 
 = What requirements are there? =
 
