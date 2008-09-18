@@ -17,7 +17,7 @@ $session = curl_init( $path );
 
 // If it's a POST, put the POST data in the body
 $postvars = '';
-while ( $element = current( $_POST ) ) {
+while ( ($element = current( $_POST ))!==FALSE ) {
 	$new_element = str_replace( '&', '%26', $element );
 	$new_element = str_replace( ';', '%3B', $new_element );
 	$postvars .= key( $_POST ).'='.$new_element.'&';

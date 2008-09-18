@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://www.zemanta.com/welcome/wordpress/
 Description: Contextually relevant suggestions of links, pictures, related content and tags will make your blogging fun again.
-Version: 0.2.6
+Version: 0.5.0
 Author: Jure Cuhalev <jure@zemanta.com>, Marko Samastur <marko.samastur@zemanta.com>, Zemanta Ltd.
 Author URI: http://www.zemanta.com
 */
