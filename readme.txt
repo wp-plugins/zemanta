@@ -30,7 +30,7 @@ Zemanta browser extension is probably in conflict with WordPress plugin. Upgrade
 
 = What requirements are there? =
 
-PHP4/PHP5 together with installed cURL module.
+PHP4/PHP5 together with installed cURL module or allowed fopen.
 
 == Screenshots ==
 
