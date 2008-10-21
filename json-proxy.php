@@ -1,4 +1,5 @@
-<?php
+<?
+
 // PHP Proxy based on example for Yahoo! Web services.
 //
 // Author: Jason Levitt
@@ -7,36 +8,59 @@
 //
 // Adapted for Zemanta Wordpress plugin
 // by Jure Cuhalev - <jure@zemanta.com>
-//
 // October 11th, 2007
+//
+// de-curled by Jure Koren - <jure.koren@zemanta.com>, borrowing from
+// http://netevil.org/blog/2006/nov/http-post-from-php-without-curl
+// October 16th, 2008
 
 $path = 'http://api.zemanta.com/services/rest/0.0/';
 
-// Open the Curl session
-$session = curl_init( $path );
+function do_post_request($url, $data, $optional_headers = null)
+{
+	$params = array('http' => array(
+				'method' => 'POST',
+				'content' => $data
+					));
+	if ($optional_headers !== null) {
+		$params['http']['header'] = $optional_headers;
+	}
+	$ctx = stream_context_create($params);
+	$fp = @fopen($url, 'rb', false, $ctx);
+	if (!$fp) {
+		die("Problem connecting to $url : $php_errormsg\n");
+	}
+	$response = @stream_get_contents($fp);
+	if ($response === false) {
+		die("Problem reading data from $url : $php_errormsg\n");
+	}
+	return $response;
+}
 
 // If it's a POST, put the POST data in the body
 $postvars = '';
-while ( $element = current( $_POST ) ) {
+while ( ($element = current( $_POST ))!==FALSE ) {
 	$new_element = str_replace( '&', '%26', $element );
 	$new_element = str_replace( ';', '%3B', $new_element );
 	$postvars .= key( $_POST ).'='.$new_element.'&';
 	next( $_POST );
 }
-curl_setopt ( $session, CURLOPT_POST, true );
-curl_setopt ( $session, CURLOPT_POSTFIELDS, $postvars );
-
-// Don't return HTTP headers. Do return the contents of the call
-curl_setopt( $session, CURLOPT_HEADER, false );
-curl_setopt( $session, CURLOPT_RETURNTRANSFER, true );
-
-// Make the call
-$json = curl_exec( $session );
+if (extension_loaded("curl")) { // curl extension is loaded
+	$session = curl_init( $path );
+	curl_setopt ( $session, CURLOPT_POST, true );
+	curl_setopt ( $session, CURLOPT_POSTFIELDS, $postvars );
+	curl_setopt( $session, CURLOPT_HEADER, false );
+	curl_setopt( $session, CURLOPT_RETURNTRANSFER, true );
+	$json = curl_exec( $session );
+	curl_close( $session );
+} else if (ini_get("allow_url_fopen")) { // allow_url_fopen = on
+	$json = do_post_request( $path, $postvars );
+} else { // we can't POST like this
+	$json = '{"error":"Sorry, your PHP does not support fopen wrappers and has no curl extension loaded."}';
+}
 
 // The web service returns JSON. Set the Content-Type appropriately
 header("Content-Type: text/plain");
-
 echo $json;
-curl_close( $session );
 
 ?>

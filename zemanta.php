@@ -6,14 +6,14 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://www.zemanta.com/welcome/wordpress/
 Description: Contextually relevant suggestions of links, pictures, related content and tags will make your blogging fun again.
-Version: 0.2.6
-Author: Jure Cuhalev <jure@zemanta.com>, Marko Samastur <marko.samastur@zemanta.com>, Zemanta Ltd.
+Version: 0.5.1
+Author: Jure Cuhalev <jure@zemanta.com>, Marko Samastur <marko.samastur@zemanta.com>, Jure Koren <jure.koren@zemanta.com>, Zemanta Ltd.
 Author URI: http://www.zemanta.com
 */
 
 function zem_check_dependencies() {
 	// Return true if CURL and DOM XML modules exist and false otherwise
-	return ( function_exists( 'curl_init' )  &&
+	return ( ( function_exists( 'curl_init' ) || ini_get('allow_url_fopen') ) &&
 		( function_exists( 'preg_match' ) || function_exists( 'ereg' ) ) );
 }
 
@@ -29,23 +29,48 @@ function zem_reg_match( $rstr, $str ) {
 	return $matches;
 }
 
+function do_post_request($url, $data, $optional_headers = null)
+{
+	$params = array('http' => array(
+				'method' => 'POST',
+				'content' => $data
+					));
+	if ($optional_headers !== null) {
+		$params['http']['header'] = $optional_headers;
+	}
+	$ctx = stream_context_create($params);
+	$fp = @fopen($url, 'rb', false, $ctx);
+	if (!$fp) {
+		die("Problem connecting to $url : $php_errormsg\n");
+	}
+	$response = @stream_get_contents($fp);
+	if ($response === false) {
+		die("Problem reading data from $url : $php_errormsg\n");
+	}
+	return $response;
+}
+
 function zem_api_key_fetch() {
 	// Fetch API key used with Zemanta calls
 	$api = '';
 	$url = 'http://api.zemanta.com/services/rest/0.0/';
 	$postvars = 'method=zemanta.auth.create_user';
 
-	$session = curl_init( $url );
-	curl_setopt ( $session, CURLOPT_POST, true );
-	curl_setopt ( $session, CURLOPT_POSTFIELDS, $postvars );
+	if ( function_exists( 'curl_init' ) ) {
+		$session = curl_init( $url );
+		curl_setopt ( $session, CURLOPT_POST, true );
+		curl_setopt ( $session, CURLOPT_POSTFIELDS, $postvars );
 
-	// Don't return HTTP headers. Do return the contents of the call
-	curl_setopt( $session, CURLOPT_HEADER, false );
-	curl_setopt( $session, CURLOPT_RETURNTRANSFER, true );
+		// Don't return HTTP headers. Do return the contents of the call
+		curl_setopt( $session, CURLOPT_HEADER, false );
+		curl_setopt( $session, CURLOPT_RETURNTRANSFER, true );
 
-	// Make the call
-	$rsp = curl_exec( $session );
-	curl_close( $session );
+		// Make the call
+		$rsp = curl_exec( $session );
+		curl_close( $session );
+	} else if ( ini_get( 'allow_url_fopen' ) ) {
+		$rsp = do_post_request($url, $postvars);
+	}
 
 	// Parse returned result
 	$matches = zem_reg_match( '/<status>(.+?)<\/status>/', $rsp );
@@ -121,7 +146,7 @@ function zem_wp_admin() {
 if ( !zem_check_dependencies() ) {
 	function zem_warning () {
 		echo "
-		<div class='updated fade'><p>".__('Zemanta needs a PHP module cURL to work. Please ask your server administrator to include it.')."</p></div>";
+		<div class='updated fade'><p>".__('Zemanta needs either the cURL PHP module or allow_url_fopen enabled to work. Please ask your server administrator to set either of these up.')."</p></div>";
 	}
 
 	add_action('admin_notices', 'zem_warning');
@@ -133,6 +158,17 @@ $api_key = get_option( 'zemanta_api_key' );
 if ( !$api_key ) {
 	$api_key = zem_api_key_fetch();
 	update_option( 'zemanta_api_key', $api_key );
+
+	if ( !$api_key ) {
+		function zem_api_key_error () {
+			echo "
+			<div class='updated fade'><p>".__('Zemanta failed to obtain the neccessary information. Please, try again after a short while.')."</p></div>";
+		}
+
+		add_action('admin_notices', 'zem_api_key_error');
+		return;
+	}
+
 }
 
 // Register actions
