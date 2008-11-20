@@ -2,8 +2,8 @@
 Contributors: zemanta
 Tags: zemanta, widget, images, links, tags, articles
 Requires at least: 2.1.0
-Tested up to: 2.6.2
-Stable Tag: 0.5.1
+Tested up to: 2.7
+Stable Tag: 0.5.2
 
 Zemanta adds a widget to your editor that finds related content to your blog post.
 
