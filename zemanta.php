@@ -6,10 +6,12 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://www.zemanta.com/welcome/wordpress/
 Description: Contextually relevant suggestions of links, pictures, related content and tags will make your blogging fun again.
-Version: 0.5.1
-Author: Jure Cuhalev <jure@zemanta.com>, Marko Samastur <marko.samastur@zemanta.com>, Jure Koren <jure.koren@zemanta.com>, Zemanta Ltd.
-Author URI: http://www.zemanta.com
+Version: 0.5.2
+Author: Zemanta Ltd. <info@zemanta.com>
+Author URI: http://www.zemanta.com/
 */
+
+require_once(ABSPATH . '/wp-includes/pluggable.php');
 
 function zem_check_dependencies() {
 	// Return true if CURL and DOM XML modules exist and false otherwise
@@ -82,11 +84,116 @@ function zem_api_key_fetch() {
 	return $api;
 }
 
+function zem_test_proxy() {
+
+	$url = ($_SERVER['HTTPS'] == 'off' || !$_SERVER['HTTPS'])?'http://':'https://';
+	$url .= $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . '/../wp-content/plugins/zemanta/json-proxy.php';
+	$api_key = get_option( 'zemanta_api_key' );
+	$args = array(
+	'method'=> 'zemanta.suggest',
+	'api_key'=> $api_key,
+	'text'=> '',
+	'format'=> 'xml'
+	);
+
+	$data = "";
+	foreach($args as $key=>$value)
+	{
+	$data .= ($data != "")?"&":"";
+	$data .= urlencode($key)."=".urlencode($value);
+	}
+
+	if ( function_exists( 'curl_init' ) ) {
+		$session = curl_init( $url );
+		curl_setopt ( $session, CURLOPT_POST, true );
+		curl_setopt ( $session, CURLOPT_POSTFIELDS, $data );
+
+		// Don't return HTTP headers. Do return the contents of the call
+		curl_setopt( $session, CURLOPT_HEADER, false );
+		curl_setopt( $session, CURLOPT_RETURNTRANSFER, true );
+
+		// Make the call
+		$rsp = curl_exec( $session );
+		curl_close( $session );
+	} else if ( ini_get( 'allow_url_fopen' ) ) {
+		$rsp = do_post_request($url, $data);
+	} else {
+		return _("Zemanta needs either the cURL PHP module or allow_url_fopen enabled to work. Please ask your server administrator to set either of these up.");
+	}
+
+	$matches = zem_reg_match( '/<status>(.+?)<\/status>/', $rsp );
+	if (!$matches)
+		return _("Invalid response: ") . '"' . htmlspecialchars($rsp) . '"';
+	return $matches[1];
+}
+
+function zem_test_api() {
+
+	$url = 'http://api.zemanta.com/services/rest/0.0/';
+	$api_key = get_option( 'zemanta_api_key' );
+	$args = array(
+	'method'=> 'zemanta.suggest',
+	'api_key'=> $api_key,
+	'text'=> '',
+	'format'=> 'xml'
+	);
+
+	$data = "";
+	foreach($args as $key=>$value)
+	{
+	$data .= ($data != "")?"&":"";
+	$data .= urlencode($key)."=".urlencode($value);
+	}
+
+	if ( function_exists( 'curl_init' ) ) {
+		$session = curl_init( $url );
+		curl_setopt ( $session, CURLOPT_POST, true );
+		curl_setopt ( $session, CURLOPT_POSTFIELDS, $data );
+
+		// Don't return HTTP headers. Do return the contents of the call
+		curl_setopt( $session, CURLOPT_HEADER, false );
+		curl_setopt( $session, CURLOPT_RETURNTRANSFER, true );
+
+		// Make the call
+		$rsp = curl_exec( $session );
+		curl_close( $session );
+	} else if ( ini_get( 'allow_url_fopen' ) ) {
+		$rsp = do_post_request($url, $data);
+	} else {
+		return _("Zemanta needs either the cURL PHP module or allow_url_fopen enabled to work. Please ask your server administrator to set either of these up.");
+	}
+
+	$matches = zem_reg_match( '/<status>(.+?)<\/status>/', $rsp );
+	if (!$matches)
+		return _("Invalid response: ") . '"' . htmlspecialchars($rsp) . '"';
+	return $matches[1];
+}
+
+function zem_wp_debug() {
+	$api_key = get_option( 'zemanta_api_key' );
+	if ( !$api_key ) {
+		$api_key = zem_api_key_fetch();
+		update_option( 'zemanta_api_key', $api_key );
+	}
+
+	echo '<div class="wrap">';
+	echo "<h2>" . __( 'Zemanta Plugin Status', 'zemanta' ) . "</h2>";
+
+	?>
+	<p>Api key (if you have one, your wordpress can talk to Zemanta): <strong><?php echo $api_key; ?></strong></p>
+	<p>Zemanta response (anything but "ok" means trouble): <strong><?php echo '"' . zem_test_api() . '"' ; ?></strong></p>
+	<p>Your ajax proxy response (anything but "ok" means trouble): <strong><?php echo '"' . zem_test_proxy() . '"' ; ?></strong></p>
+
+	</div>
+	<?php
+}
+
 function zem_wp_head() {
 	// Insert Zemanta widget in sidebar
 	$opt_val = get_option( 'zemanta_api_key' );
 
 	print '<script type="text/javascript">window.ZemantaGetAPIKey = function () { return "' . $opt_val . '"; }</script>';
+	print '<script type="text/javascript">window.ZemantaWPPluginVersion = function () { return "0.5.3"; }</script>';
 	print '<script id="zemanta-loader" type="text/javascript" src="http://static.zemanta.com/plugins/wordpress/2.x/loader.js"></script>';
 };
 
@@ -140,6 +247,7 @@ function zem_wp_admin() {
 	</form>
 </div>
 <?php
+	zem_wp_debug();
 }
 
 // Check dependencies
@@ -169,6 +277,65 @@ if ( !$api_key ) {
 		return;
 	}
 
+}
+// Insert Zemanta to the top-right position if it was not positioned previously
+function check_zemanta_position($metabox_positions) { //Checks if zemanta-sidebar has position
+	if (!$metabox_positions) return false;
+	foreach ($metabox_positions as $position) {
+		foreach (split(',',$position) as $p) {
+			if ($p == "zemanta-sidebar") {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+function set_default_zemanta_position() {
+	global $table_prefix, $current_user;
+	wp_get_current_user();
+	$metabox_positions = get_usermeta($current_user->ID, $table_prefix . 'metaboxorder_post');
+	if (!check_zemanta_position($metabox_positions)) {
+		if ($metabox_positions) {
+			if (array_key_exists('side', $metabox_positions)) {
+				if ($metabox_positions['side']) {
+					$metabox_positions['side'] = 'zemanta-sidebar,' . $metabox_positions['side'];
+				} else {
+					$metabox_positions['side'] = 'zemanta-sidebar';
+				}
+			} else {
+				$metabox_positions['side'] = 'zemanta-sidebar';
+			}
+		} else {
+			$metabox_positions = array('side'=>'zemanta-sidebar');
+		}
+		update_user_option( $current_user->ID, "meta-box-order_post", $metabox_positions );
+	}
+}
+
+// Custom Meta Box
+function zemanta_add_custom_box() {
+  if( function_exists( 'add_meta_box' )) {
+    add_meta_box( 'zemanta-sidebar', __( 'Zemanta', 'myplugin_textdomain' ), 
+                'zemanta_inner_custom_box', 'post', 'advanced' );
+    add_meta_box( 'zemanta-sidebar', __( 'Zemanta', 'myplugin_textdomain' ), 
+                'zemanta_inner_custom_box', 'page', 'advanced' );
+   }
+}
+
+/* Zemanta on the custom post/page section */
+function zemanta_inner_custom_box() {
+  // Use nonce for verification
+  echo '<div id="zemanta-control" class="zemanta"></div><div id="zemanta-message" class="zemanta">Loading Zemanta...</div><div id="zemanta-filter" class="zemanta"></div><div id="zemanta-gallery" class="zemanta"></div><div id="zemanta-articles" class="zemanta"></div><div id="zemanta-preferences" class="zemanta"></div>';
+}
+
+//Hook for WP2.7 - MetaBoxes generated with naticve Wordpress functions to enable storing of theri position
+global $wp_version;
+if (substr($wp_version,0,3) >= '2.7') {
+	/* Set Zemanta default position (if it is not already set) */	
+	set_default_zemanta_position();
+	/* Use the admin_menu action to define the custom boxes */
+	add_action('admin_menu', 'zemanta_add_custom_box');
 }
 
 // Register actions
