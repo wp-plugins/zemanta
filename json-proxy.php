@@ -15,9 +15,11 @@
 // October 16th, 2008
 
 $path = 'http://api.zemanta.com/services/rest/0.0/';
+$error = '';
 
 function do_post_request($url, $data, $optional_headers = null)
 {
+	global $error;
 	$params = array('http' => array(
 				'method' => 'POST',
 				'content' => $data
@@ -28,11 +30,12 @@ function do_post_request($url, $data, $optional_headers = null)
 	$ctx = stream_context_create($params);
 	$fp = @fopen($url, 'rb', false, $ctx);
 	if (!$fp) {
-		die("Problem connecting to $url : $php_errormsg\n");
+		$error = "Problem connecting to $url : $php_errormsg\n";
+		return false;
 	}
 	$response = @stream_get_contents($fp);
 	if ($response === false) {
-		die("Problem reading data from $url : $php_errormsg\n");
+		$error = "Problem reading data from $url : $php_errormsg\n";
 	}
 	return $response;
 }
@@ -53,14 +56,29 @@ if (extension_loaded("curl")) { // curl extension is loaded
 	curl_setopt( $session, CURLOPT_RETURNTRANSFER, true );
 	$json = curl_exec( $session );
 	curl_close( $session );
+	if (!$json) {
+		$json = false;
+		$error = "CURL failed to connect to Zemanta.\n";
+	}
 } else if (ini_get("allow_url_fopen")) { // allow_url_fopen = on
 	$json = do_post_request( $path, $postvars );
 } else { // we can't POST like this
-	$json = '{"error":"Sorry, your PHP does not support fopen wrappers and has no curl extension loaded."}';
+	$json = false;
+	$error = "Sorry, your PHP does not support fopen wrappers and has no curl extension loaded.\n";
 }
 
-// The web service returns JSON. Set the Content-Type appropriately
-header("Content-Type: text/plain");
-echo $json;
+if ($json === false) {
+	header($_SERVER['SERVER_PROTOCOL'] . " 500");
+	die($error);
+}
+elseif ($json == "<h1>403 Developer Inactive</h1>") {
+	header($_SERVER['SERVER_PROTOCOL'] . " 403");
+	die("Mashery said access denied. Invalid api key? Too many requests?\n");
+}
+else {
+	// The web service returns JSON. Set the Content-Type appropriately
+	header("Content-Type: text/plain");
+	echo $json;
+}
 
 ?>
