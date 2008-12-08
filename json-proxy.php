@@ -1,4 +1,4 @@
-<?
+<?php
 
 // PHP Proxy based on example for Yahoo! Web services.
 //
