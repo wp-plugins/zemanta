@@ -6,17 +6,19 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://www.zemanta.com/welcome/wordpress/
 Description: Contextually relevant suggestions of links, pictures, related content and tags will make your blogging fun again.
-Version: 0.5.3
+Version: 0.5.4
 Author: Zemanta Ltd. <info@zemanta.com>
 Author URI: http://www.zemanta.com/
 */
-
-require_once(ABSPATH . '/wp-includes/pluggable.php');
 
 function zem_check_dependencies() {
 	// Return true if CURL and DOM XML modules exist and false otherwise
 	return ( ( function_exists( 'curl_init' ) || ini_get('allow_url_fopen') ) &&
 		( function_exists( 'preg_match' ) || function_exists( 'ereg' ) ) );
+}
+
+function zemanta_activate() {
+	chmod(dirname(__FILE__) . "/json-proxy.php", 0755);
 }
 
 function zem_reg_match( $rstr, $str ) {
@@ -84,10 +86,15 @@ function zem_api_key_fetch() {
 	return $api;
 }
 
+function zem_proxy_url() {
+	$url = ($_SERVER['HTTPS'] == 'off' || !$_SERVER['HTTPS'])?'http://':'https://';
+	$url .= $_SERVER['SERVER_NAME'] . ':' $_SERVER['SERVER_PORT'] . dirname($_SERVER['PHP_SELF']) . '/../wp-content/plugins/zemanta/json-proxy.php';
+	return $url;
+}
+
 function zem_test_proxy() {
 
-	$url = ($_SERVER['HTTPS'] == 'off' || !$_SERVER['HTTPS'])?'http://':'https://';
-	$url .= $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . '/../wp-content/plugins/zemanta/json-proxy.php';
+	$url = zem_proxy_url();
 	$api_key = get_option( 'zemanta_api_key' );
 	$args = array(
 	'method'=> 'zemanta.suggest',
@@ -179,10 +186,19 @@ function zem_wp_debug() {
 	echo '<div class="wrap">';
 	echo "<h2>" . __( 'Zemanta Plugin Status', 'zemanta' ) . "</h2>";
 
+	$apitest = zem_test_api();
+	$proxytest = zem_test_proxy();
+
+	if ($apitest == "ok") $apiresult = '<span style="color: green;">OK</span>';
+	else $apiresult = '<span style="color: red;">Invalid</span>';
+
+	if ($proxytest == "ok") $proxyresult = '<span style="color: green;">OK</span>';
+	else $proxyresult = '<a style="color: red; font-weight: bold;" href="'. zem_proxy_url() .'">Invalid, click here to see the error message</a>';
+
 	?>
 	<p>Api key (if you have one, your wordpress can talk to Zemanta): <strong><?php echo $api_key; ?></strong></p>
-	<p>Zemanta response (anything but "ok" means trouble): <strong><?php echo '"' . zem_test_api() . '"' ; ?></strong></p>
-	<p>Your ajax proxy response (anything but "ok" means trouble): <strong><?php echo '"' . zem_test_proxy() . '"' ; ?></strong></p>
+	<p>Zemanta response: <strong><?php echo $apiresult; ?></strong></p>
+	<p>Your ajax proxy response: <strong><?php echo $proxyresult; ?></strong></p>
 
 	</div>
 	<?php
@@ -193,7 +209,7 @@ function zem_wp_head() {
 	$opt_val = get_option( 'zemanta_api_key' );
 
 	print '<script type="text/javascript">window.ZemantaGetAPIKey = function () { return "' . $opt_val . '"; }</script>';
-	print '<script type="text/javascript">window.ZemantaWPPluginVersion = function () { return "0.5.3"; }</script>';
+	print '<script type="text/javascript">window.ZemantaWPPluginVersion = function () { return "0.5.4"; }</script>';
 	print '<script id="zemanta-loader" type="text/javascript" src="http://static.zemanta.com/plugins/wordpress/2.x/loader.js"></script>';
 };
 
@@ -261,23 +277,6 @@ if ( !zem_check_dependencies() ) {
 	return;
 }
 
-// Fetch an API key on first run, if it doesn't exist yet or is empty
-$api_key = get_option( 'zemanta_api_key' );
-if ( !$api_key ) {
-	$api_key = zem_api_key_fetch();
-	update_option( 'zemanta_api_key', $api_key );
-
-	if ( !$api_key ) {
-		function zem_api_key_error () {
-			echo "
-			<div class='updated fade'><p>".__('Zemanta failed to obtain the neccessary information. Please, try again after a short while.')."</p></div>";
-		}
-
-		add_action('admin_notices', 'zem_api_key_error');
-		return;
-	}
-
-}
 // Insert Zemanta to the top-right position if it was not positioned previously
 function check_zemanta_position($metabox_positions) { //Checks if zemanta-sidebar has position
 	if (!$metabox_positions) return false;
@@ -292,6 +291,11 @@ function check_zemanta_position($metabox_positions) { //Checks if zemanta-sideba
 }
 
 function set_default_zemanta_position() {
+	set_default_zemanta_post_position();
+	set_default_zemanta_page_position();
+}
+
+function set_default_zemanta_post_position() {
 	global $table_prefix, $current_user;
 	wp_get_current_user();
 	$metabox_positions = get_usermeta($current_user->ID, $table_prefix . 'metaboxorder_post');
@@ -313,6 +317,28 @@ function set_default_zemanta_position() {
 	}
 }
 
+function set_default_zemanta_page_position() {
+	global $table_prefix, $current_user;
+	wp_get_current_user();
+	$metabox_positions = get_usermeta($current_user->ID, $table_prefix . 'metaboxorder_page');
+	if (!check_zemanta_position($metabox_positions)) {
+		if ($metabox_positions) {
+			if (array_key_exists('side', $metabox_positions)) {
+				if ($metabox_positions['side']) {
+					$metabox_positions['side'] = 'zemanta-sidebar,' . $metabox_positions['side'];
+				} else {
+					$metabox_positions['side'] = 'zemanta-sidebar';
+				}
+			} else {
+				$metabox_positions['side'] = 'zemanta-sidebar';
+			}
+		} else {
+			$metabox_positions = array('side'=>'zemanta-sidebar');
+		}
+		update_user_option( $current_user->ID, "meta-box-order_page", $metabox_positions );
+	}
+}
+
 // Custom Meta Box
 function zemanta_add_custom_box() {
   if( function_exists( 'add_meta_box' )) {
@@ -329,16 +355,41 @@ function zemanta_inner_custom_box() {
   echo '<div id="zemanta-control" class="zemanta"></div><div id="zemanta-message" class="zemanta">Loading Zemanta...</div><div id="zemanta-filter" class="zemanta"></div><div id="zemanta-gallery" class="zemanta"></div><div id="zemanta-articles" class="zemanta"></div><div id="zemanta-preferences" class="zemanta"></div>';
 }
 
-//Hook for WP2.7 - MetaBoxes generated with naticve Wordpress functions to enable storing of theri position
+// Fetch an API key on first run, if it doesn't exist yet or is empty
+$api_key = get_option( 'zemanta_api_key' );
+if ( !$api_key ) {
+	$api_key = zem_api_key_fetch();
+	update_option( 'zemanta_api_key', $api_key );
+
+	if ( !$api_key ) {
+		function zem_api_key_error () {
+			echo "
+			<div class='updated fade'><p>".__('Zemanta failed to obtain the neccessary information. Please, try again after a short while.')."</p></div>";
+		}
+
+		add_action('admin_notices', 'zem_api_key_error');
+		add_action( 'admin_menu', 'zem_config_page' );
+		return;
+	}
+
+}
+
+//Hook for WP2.7 - MetaBoxes generated with native Wordpress functions to enable storing of their position
 global $wp_version;
 if (substr($wp_version,0,3) >= '2.7') {
 	/* Set Zemanta default position (if it is not already set) */	
+	require_once(ABSPATH . '/wp-includes/pluggable.php');
 	set_default_zemanta_position();
 	/* Use the admin_menu action to define the custom boxes */
 	add_action('admin_menu', 'zemanta_add_custom_box');
 }
 
 // Register actions
+//add_action( 'dbx_page_sidebar', 'zem_wp_head', 1 );
 add_action( 'dbx_post_sidebar', 'zem_wp_head', 1 );
 add_action( 'admin_menu', 'zem_config_page' );
+add_action( 'activate_zemanta', 'zemanta_activate' );
+add_action( 'edit_page_form', 'zem_wp_head', 1 );
+register_activation_hook(__FILE__, 'zemanta_activate');
+
 ?>
