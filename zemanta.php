@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://www.zemanta.com/welcome/wordpress/
 Description: Contextually relevant suggestions of links, pictures, related content and tags will make your blogging fun again.
-Version: 0.5.4
+Version: 0.5.5
 Author: Zemanta Ltd. <info@zemanta.com>
 Author URI: http://www.zemanta.com/
 */
@@ -88,7 +88,7 @@ function zem_api_key_fetch() {
 
 function zem_proxy_url() {
 	$url = ($_SERVER['HTTPS'] == 'off' || !$_SERVER['HTTPS'])?'http://':'https://';
-	$url .= $_SERVER['SERVER_NAME'] . ':' $_SERVER['SERVER_PORT'] . dirname($_SERVER['PHP_SELF']) . '/../wp-content/plugins/zemanta/json-proxy.php';
+	$url .= $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'] . dirname($_SERVER['PHP_SELF']) . '/../wp-content/plugins/zemanta/json-proxy.php';
 	return $url;
 }
 
