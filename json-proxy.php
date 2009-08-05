@@ -6,13 +6,15 @@
 // December 7th, 2005
 //
 //
-// Adapted for Zemanta Wordpress plugin
+// Adapted for Zemanta
 // by Jure Cuhalev - <jure@zemanta.com>
 // October 11th, 2007
 //
 // de-curled by Jure Koren - <jure.koren@zemanta.com>, borrowing from
 // http://netevil.org/blog/2006/nov/http-post-from-php-without-curl
 // October 16th, 2008
+//
+// Licensed under the GPL, http://www.gnu.org/copyleft/gpl.html
 
 $path = 'http://api.zemanta.com/services/rest/0.0/';
 $error = '';
@@ -154,8 +156,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$_SESSION['last_check'] = $t;
 		$ping_response = do_post_request($_SERVER['FULL_URL'], "method=zemanta.service.ping&api_key=$test_api_key&format=json");
 		$direct_ping_response = do_post_request($path, "method=zemanta.service.ping&api_key=$test_api_key&format=json");
-		$suggest_response = do_post_request($_SERVER['FULL_URL'], "method=zemanta.suggest&api_key=$test_api_key&format=json&text=Wordpress " . $t);
-		$direct_suggest_response = do_post_request($path, "method=zemanta.suggest&api_key=$test_api_key&format=json&text=Wordpress " . $t);
+		$suggest_response = do_post_request($_SERVER['FULL_URL'], "method=zemanta.suggest&api_key=$test_api_key&format=json&text=Proxy test " . $t);
+		$direct_suggest_response = do_post_request($path, "method=zemanta.suggest&api_key=$test_api_key&format=json&text=Proxy test " . $t);
 		echo "<html><head><script type=\"text/javascript\">function toggle(o) {if (o.style.width == 'auto')";
 		echo "{o.style.width='30em'; o.style.height='1em';} else {o.style.width=o.style.height='auto';} return false;}</script></head><body>\n";
 		echo "<h1>Zemanta proxy</h1>\n";
