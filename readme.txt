@@ -3,7 +3,7 @@ Contributors: zemanta
 Tags: zemanta, widget, images, links, tags, articles, seo, enrich, media, semantic web, multimedia, video, maps, AJAX, dynamic apps, content, related content, interactive, books,
 Requires at least: 2.1.0
 Tested up to: 2.8
-Stable Tag: 0.6.0
+Stable Tag: 0.6.1
 
 Zemanta adds a widget to your editor that finds related content to your blog post.
 
