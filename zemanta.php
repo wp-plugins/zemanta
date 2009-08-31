@@ -4,10 +4,10 @@ Copyright (c) 2007 - 2009, Zemanta Ltd.
 The copyrights to the software code in this file are licensed under the (revised) BSD open source license.
 
 Plugin Name: Zemanta
-Plugin URI: http://www.zemanta.com/welcome/wordpress/
-Description: Contextually relevant suggestions of links, pictures, related content and tags will make your blogging fun again.
+Plugin URI: http://wordpress.org/extend/plugins/zemanta/
+Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
 Version: 0.6.1
-Author: Zemanta Ltd. <info@zemanta.com>
+Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 */
 
