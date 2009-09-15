@@ -4,10 +4,10 @@ Copyright (c) 2007 - 2009, Zemanta Ltd.
 The copyrights to the software code in this file are licensed under the (revised) BSD open source license.
 
 Plugin Name: Zemanta
-Plugin URI: http://www.zemanta.com/welcome/wordpress/
-Description: Contextually relevant suggestions of links, pictures, related content and tags will make your blogging fun again.
-Version: 0.6.0
-Author: Zemanta Ltd. <info@zemanta.com>
+Plugin URI: http://wordpress.org/extend/plugins/zemanta/
+Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
+Version: 0.6.2
+Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 */
 
@@ -116,9 +116,16 @@ function zem_upload_image($url, $post, $desc) {
 	$filename = wp_unique_filename($upload_dir, basename($url));
 	$new_file = $upload_dir . "/" . $filename;
 	if (!file_exists($new_file)) {
-		$img = fopen($new_file, "w");
+		$img = @fopen($new_file, "w");
+		if ($img === false) {
+			$_SESSION['image_download_error_string'] = __('Your image upload directory (' . $upload_dir . ') is not writable. Zemanta cannot upload images there.');
+			return false;
+		}
 		list($res, $data) = zem_download($url);
-		if ($res > 0) return false;
+		if ($res > 0) {
+			$_SESSION['image_download_error_string'] = __('Zemanta could not download some or all of the images referenced in your post to your server. Please, try again later.');
+			return false;
+		}
 		fwrite($img, $data);
 		fclose($img);
 		chmod($new_file, 0644);
@@ -362,8 +369,8 @@ function zem_wp_head() {
 	$api_key = zem_api_key();
 
 	print '<script type="text/javascript">window.ZemantaGetAPIKey = function () { return "' . $api_key . '"; }</script>';
-	print '<script type="text/javascript">window.ZemantaPluginVersion = function () { return "0.5.7"; }</script>';
-	print '<script id="zemanta-loader" type="text/javascript" src="http://static.zemanta.com/plugins/wordpress/2.x/loader.js"></script>';
+	print '<script type="text/javascript">window.ZemantaPluginVersion = function () { return "0.6.2"; }</script>';
+	print '<script id="zemanta-loader" type="text/javascript" src="http://fstatic.zemanta.com/plugins/wordpress/2.x/loader.js"></script>';
 };
 
 function zem_config_page() {
@@ -408,12 +415,24 @@ function zem_wp_admin() {
 		zem_set_api_key( $key_val );
 		zem_set_option( $uploader_field, $uploader_val );
 		zem_set_option( $uploader_promisc_field, $uploader_promisc_val );
+		if ( $uploader_val && !$uploader_custom_path_val ) {
+			$uploads = wp_upload_dir();
+			$upload_dir = $uploads['path'];
+			if ( !is_writable($upload_dir) ) {
+				echo '<div class="error"><p><strong>' . __('Your wordpress upload directory (' . $upload_dir . ') cannot be written to. Zemanta will not be able to upload images there.', 'zemanta' ) . '</strong></p></div>';
+			}
+		}
 		if ( $uploader_val && $uploader_custom_path_val ) {
+			if ( !is_writable($uploader_dir_val) ) {
+				echo '<div class="error"><p><strong>' . __('Upload directory you have set (' . $uploader_dir_val . ') cannot be written to. Zemanta will not be able to upload images there.', 'zemanta' ) . '</strong></p></div>';
+			}
 			zem_set_option( $uploader_dir_field, $uploader_dir_val );
 			zem_set_option( $uploader_url_field, $uploader_url_val );
+			zem_set_option( $uploader_custom_path_field, $uploader_custom_path_val );
 		} else {
 			zem_set_option( $uploader_dir_field, null );
 			zem_set_option( $uploader_url_field, null );
+			zem_set_option( $uploader_custom_path_field, $uploader_custom_path_val );
 		}
 		// Put an options updated message on the screen
 ?>
@@ -590,7 +609,7 @@ function zem_inner_custom_box() {
 session_start();
 if (isset($_SESSION['image_download_errors'])) {
     function zem_image_download_errors () {
-        echo "<div class='updated fade'><p>".__('Zemanta could not download some or all of the images referenced in your post to your server. Please, try again later.')."</p></div>";
+        echo "<div class='updated fade'><p>". $_SESSION['image_download_error_string'] ."</p></div>";
     }
     add_action('admin_notices', 'zem_image_download_errors');
     unset($_SESSION['image_download_errors']);
