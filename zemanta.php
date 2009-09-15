@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
-Version: 0.6.1
+Version: 0.6.2
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 */
@@ -369,8 +369,8 @@ function zem_wp_head() {
 	$api_key = zem_api_key();
 
 	print '<script type="text/javascript">window.ZemantaGetAPIKey = function () { return "' . $api_key . '"; }</script>';
-	print '<script type="text/javascript">window.ZemantaPluginVersion = function () { return "0.5.7"; }</script>';
-	print '<script id="zemanta-loader" type="text/javascript" src="http://static.zemanta.com/plugins/wordpress/2.x/loader.js"></script>';
+	print '<script type="text/javascript">window.ZemantaPluginVersion = function () { return "0.6.2"; }</script>';
+	print '<script id="zemanta-loader" type="text/javascript" src="http://fstatic.zemanta.com/plugins/wordpress/2.x/loader.js"></script>';
 };
 
 function zem_config_page() {

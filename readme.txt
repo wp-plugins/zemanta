@@ -3,7 +3,7 @@ Contributors: zemanta
 Tags: images, links, tags, keywords, articles, seo, embed, enrich, media, semantic web, multimedia, video, youtube, maps, wikipedia, google maps, related, related content, books, zemanta, widget
 Requires at least: 2.1.0
 Tested up to: 2.8.4
-Stable Tag: 0.6.1
+Stable Tag: 0.6.2
 
 Zemanta finds related content while you write your post, so you can add pictures, links and widgets with a single click.
 
@@ -41,11 +41,11 @@ Get to know [more about Zemanta](http://www.zemanta.com).
 
 You can insert multiple images by dragging the image to your blog posts. See our tutorial on [inserting multiple images](http://www.zemanta.com/blog/multiple-images-and-drag-and-drop-with-zemanta/ "Drag and Drop images in Zemanta").
 
-== Can Zemanta recommend me my own photos? ==
+= Can Zemanta recommend me my own photos? =
 
 Yes. You can setup Flickr account in Preferences and we'll recommend pictures from your account.
 
-== Can Zemanta recommend me my own blog posts? ==
+= Can Zemanta recommend me my own blog posts? =
 
 Yes, see tutorial on [How to: Use Zemanta to recommend articles from your own blog(s)](http://www.zemanta.com/blog/how-to-use-zemanta-to-recommend-articles-from-your-own-blogs/)
 
