@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
-Version: 0.6.3
+Version: 0.6.4
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 */
@@ -369,7 +369,7 @@ function zem_wp_head() {
 	$api_key = zem_api_key();
 
 	print '<script type="text/javascript">window.ZemantaGetAPIKey = function () { return "' . $api_key . '"; }</script>';
-	print '<script type="text/javascript">window.ZemantaPluginVersion = function () { return "0.6.3"; }</script>';
+	print '<script type="text/javascript">window.ZemantaPluginVersion = function () { return "0.6.4"; }</script>';
 	print '<script id="zemanta-loader" type="text/javascript" src="http://fstatic.zemanta.com/plugins/wordpress/2.x/loader.js"></script>';
 };
 
@@ -472,7 +472,9 @@ function zem_wp_admin() {
         <p><?php _e('Enable Zemanta image uploader:', 'zemanta' ); ?>
 			<input id="zemsettings_uploader_checkbox" type="checkbox" name="<?php echo $uploader_field; ?>" <?php if ($uploader_val) echo "checked=\"checked\""; ?> onclick="zemsettings_togglepanel('zemsettings_pathinfo', !document.getElementById('zemsettings_advanced_checkbox').checked); return zemsettings_togglepanel('zemsettings_uploader', this.checked);" <?php if ($wp_version <= '2.5') echo 'disabled="disabled" '; ?>/>
 		</p>
-		<p class="updated"><?php if ($wp_version <= '2.5') _e('Zemanta image uploader is only supported with Wordpress 2.5 or above.', 'zemanta'); ?></p>
+		<?php if ($wp_version <= '2.5') { ?>
+		<p class="updated"><? _e('Zemanta image uploader is only supported with Wordpress 2.6 or above.', 'zemanta'); ?></p>
+		<? } ?>
 		<div id="zemsettings_uploader" style="display: none;">
 			<p><?php _e('Allow Zemanta uploader to upload any image referenced by your post to your blog:', 'zemanta' ); ?>
 				<input id="zemsettings_promisc_checkbox" type="checkbox" name="<?php echo $uploader_promisc_field; ?>" <?php if ($uploader_promisc_val) echo "checked=\"checked\""; ?> onclick="return zemsettings_togglepanel('zemsettings_disclaim', (this.checked&&document.getElementById('zemsettings_uploader_checkbox').checked));" />
@@ -501,7 +503,7 @@ function zem_wp_admin() {
 			</div>
 		</div>
 		<p class="submit">
-			<input type="submit" name="Submit" value="<?php _e('Update Options', 'zemanta' ) ?>" />
+			<input type="submit" name="Submit" value="<?php _e('Save changes', 'zemanta' ) ?>" />
 		</p>
 	</form>
 	<script type="text/javascript">
@@ -527,11 +529,15 @@ if ( !zem_check_dependencies() ) {
 }
 
 // Insert Zemanta to the top-right position if it was not positioned previously
-function zem_check_zemanta_position($metabox_positions) { //Checks if zemanta-sidebar has position
+function zem_check_zemanta_position($metabox_positions) { //Checks if zemanta-wordpress has position
 	if (!$metabox_positions) return false;
 	foreach ($metabox_positions as $position) {
 		foreach (split(',',$position) as $p) {
+			// if old zemanta-sidebar is found, set_default_position will replace it
 			if ($p == "zemanta-sidebar") {
+				return false;
+			}
+			if ($p == "zemanta-wordpress") {
 				return true;
 			}
 		}
@@ -552,15 +558,24 @@ function zem_set_default_zemanta_post_position() {
 		if ($metabox_positions) {
 			if (array_key_exists('side', $metabox_positions)) {
 				if ($metabox_positions['side']) {
-					$metabox_positions['side'] = 'zemanta-sidebar,' . $metabox_positions['side'];
+					// if found, replace old zemanta-sidebar with zemanta-wordpress
+					if (strpos($metabox_positions['side'], 'zemanta-sidebar') === false) {
+						$metabox_positions['side'] = 'zemanta-wordpress,' . $metabox_positions['side'];
+					} else {
+						if (strpos($metabox_positions['side'], 'zemanta-wordpress') === false) {
+							$metabox_positions['side'] = str_replace('zemanta-sidebar', 'zemanta-wordpress', $metabox_positions['side']);
+						} else {
+							$metabox_positions['side'] = str_replace('zemanta-sidebar', '', $metabox_positions['side']);
+						}
+					}
 				} else {
-					$metabox_positions['side'] = 'zemanta-sidebar';
+					$metabox_positions['side'] = 'zemanta-wordpress';
 				}
 			} else {
-				$metabox_positions['side'] = 'zemanta-sidebar';
+				$metabox_positions['side'] = 'zemanta-wordpress';
 			}
 		} else {
-			$metabox_positions = array('side'=>'zemanta-sidebar');
+			$metabox_positions = array('side'=>'zemanta-wordpress');
 		}
 		update_user_option( $current_user->ID, "meta-box-order_post", $metabox_positions );
 	}
@@ -574,15 +589,24 @@ function zem_set_default_zemanta_page_position() {
 		if ($metabox_positions) {
 			if (array_key_exists('side', $metabox_positions)) {
 				if ($metabox_positions['side']) {
-					$metabox_positions['side'] = 'zemanta-sidebar,' . $metabox_positions['side'];
+					// if found, replace old zemanta-sidebar with zemanta-wordpress
+					if (strpos($metabox_positions['side'], 'zemanta-sidebar') === false) {
+						$metabox_positions['side'] = 'zemanta-wordpress,' . $metabox_positions['side'];
+					} else {
+						if (strpos($metabox_positions['side'], 'zemanta-wordpress') === false) {
+							$metabox_positions['side'] = str_replace('zemanta-sidebar', 'zemanta-wordpress', $metabox_positions['side']);
+						} else {
+							$metabox_positions['side'] = str_replace('zemanta-sidebar', '', $metabox_positions['side']);
+						}
+					}
 				} else {
-					$metabox_positions['side'] = 'zemanta-sidebar';
+					$metabox_positions['side'] = 'zemanta-wordpress';
 				}
 			} else {
-				$metabox_positions['side'] = 'zemanta-sidebar';
+				$metabox_positions['side'] = 'zemanta-wordpress';
 			}
 		} else {
-			$metabox_positions = array('side'=>'zemanta-sidebar');
+			$metabox_positions = array('side'=>'zemanta-wordpress');
 		}
 		update_user_option( $current_user->ID, "meta-box-order_page", $metabox_positions );
 	}
@@ -591,9 +615,9 @@ function zem_set_default_zemanta_page_position() {
 // Custom Meta Box
 function zem_add_custom_box() {
   if( function_exists( 'add_meta_box' )) {
-    add_meta_box( 'zemanta-sidebar', __( 'Zemanta', 'myplugin_textdomain' ), 
+    add_meta_box( 'zemanta-wordpress', __( 'Zemanta', 'myplugin_textdomain' ), 
                 'zem_inner_custom_box', 'post', 'advanced' );
-    add_meta_box( 'zemanta-sidebar', __( 'Zemanta', 'myplugin_textdomain' ), 
+    add_meta_box( 'zemanta-wordpress', __( 'Zemanta', 'myplugin_textdomain' ), 
                 'zem_inner_custom_box', 'page', 'advanced' );
    }
 }
@@ -601,7 +625,7 @@ function zem_add_custom_box() {
 /* Zemanta on the custom post/page section */
 function zem_inner_custom_box() {
   // Use nonce for verification
-  echo '<div id="zemanta-control" class="zemanta"></div><div id="zemanta-message" class="zemanta">Loading Zemanta...</div><div id="zemanta-filter" class="zemanta"></div><div id="zemanta-gallery" class="zemanta"></div><div id="zemanta-articles" class="zemanta"></div><div id="zemanta-preferences" class="zemanta"></div>';
+  echo '<div id="zemanta-sidebar"></div>';
 }
 
 // Check for image downloader errors
