@@ -69,7 +69,7 @@ Please take a look at [Zemanta Official FAQ](http://www.zemanta.com/faq/ "Zemant
 
 == Screenshots ==
 
-1. Zemanta sidebar when writing a new post about the movie Watchmen
+1. Zemanta sidebar
 2. Post write page with Zemanta, some sample content and suggestions present.
 
 == Changelog ==  
