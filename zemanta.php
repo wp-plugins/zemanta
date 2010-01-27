@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
-Version: 0.6.4
+Version: 0.6.5
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 */
@@ -369,7 +369,7 @@ function zem_wp_head() {
 	$api_key = zem_api_key();
 
 	print '<script type="text/javascript">window.ZemantaGetAPIKey = function () { return "' . $api_key . '"; }</script>';
-	print '<script type="text/javascript">window.ZemantaPluginVersion = function () { return "0.6.4"; }</script>';
+	print '<script type="text/javascript">window.ZemantaPluginVersion = function () { return "0.6.5"; }</script>';
 	print '<script id="zemanta-loader" type="text/javascript" src="http://fstatic.zemanta.com/plugins/wordpress/2.x/loader.js"></script>';
 };
 
@@ -473,8 +473,8 @@ function zem_wp_admin() {
 			<input id="zemsettings_uploader_checkbox" type="checkbox" name="<?php echo $uploader_field; ?>" <?php if ($uploader_val) echo "checked=\"checked\""; ?> onclick="zemsettings_togglepanel('zemsettings_pathinfo', !document.getElementById('zemsettings_advanced_checkbox').checked); return zemsettings_togglepanel('zemsettings_uploader', this.checked);" <?php if ($wp_version <= '2.5') echo 'disabled="disabled" '; ?>/>
 		</p>
 		<?php if ($wp_version <= '2.5') { ?>
-		<p class="updated"><? _e('Zemanta image uploader is only supported with Wordpress 2.6 or above.', 'zemanta'); ?></p>
-		<? } ?>
+		<p class="updated"><?php _e('Zemanta image uploader is only supported with Wordpress 2.6 or above.', 'zemanta'); ?></p>
+		<?php } ?>
 		<div id="zemsettings_uploader" style="display: none;">
 			<p><?php _e('Allow Zemanta uploader to upload any image referenced by your post to your blog:', 'zemanta' ); ?>
 				<input id="zemsettings_promisc_checkbox" type="checkbox" name="<?php echo $uploader_promisc_field; ?>" <?php if ($uploader_promisc_val) echo "checked=\"checked\""; ?> onclick="return zemsettings_togglepanel('zemsettings_disclaim', (this.checked&&document.getElementById('zemsettings_uploader_checkbox').checked));" />
