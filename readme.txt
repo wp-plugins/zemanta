@@ -2,8 +2,8 @@
 Contributors: zemanta
 Tags: images, links, tags, keywords, articles, seo, embed, enrich, media, semantic web, multimedia, video, youtube, maps, wikipedia, google maps, related, related content, books, zemanta, widget
 Requires at least: 2.1.0
-Tested up to: 3.0
-Stable Tag: 0.6.6
+Tested up to: 3.1
+Stable Tag: 0.7.0
 
 Zemanta finds related content while you write your post, so you can add pictures, links and widgets with a single click.
 
@@ -13,12 +13,9 @@ Zemanta **recommends content** while you write your post. It helps you enhance i
 
 Zemanta brings you:
 
-* **Links**: Wikipedia, IMDB, Rotten Tomatoes, Amazon, CrunchBase, MusicBrainz, Snooth wines, Wikinvest
-* **Videos**: YouTube, 5min
+* **Links**: Wikipedia, Amazon, IMDB, YouTube, Google Maps, CrunchBase, RottenTomatoes, MusicBrainz, MySpace, Last.fm, Snooth, Hulu, Wikinvest, Uptake, Muzu.tv, 
 * **Images**: Getty, Flickr, Wikipedia
-* **Widgets**: Google Maps, Last.fm, Slideshare, Wikinvest
-* **Articles**: Major news sources like BBC and CNN and over 10,000 blogs
-* **Social Networks**: Facebook, Twitter, MySpace, MyBlogLog
+* **Articles**: Major news sources like BBC and CNN and over 30,000 blogs
 
 A simple point and click interface allows you to add only recommendations that you like. Recommended content is blogger friendly with clearly marked licenses (Creative Commons or similar). 
 
@@ -73,6 +70,12 @@ Please take a look at [Zemanta Official FAQ](http://www.zemanta.com/faq/ "Zemant
 2. Post write page with Zemanta, some sample content and suggestions present.
 
 == Changelog ==  
+
+= 0.7.0 =
+
+* Fixed bug with publishing scheduled posts
+* Fixed image downloader
+* Fixed sidebar positioning
 
 = 0.6.6 =
 
