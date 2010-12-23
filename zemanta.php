@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
-Version: 0.6.5
+Version: 0.7.0
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 */
@@ -26,7 +26,21 @@ function zem_check_dependencies() {
 }
 
 function zem_activate() {
-	chmod(dirname(__FILE__) . "/json-proxy.php", 0755);
+	//Fix proxy permissions
+	chmod(dirname(__FILE__) . "/json-proxy.php", 0755); 
+
+	//Fixing usermeta 
+	if (function_exists('delete_user_meta')) { //Checking that we are WP3.0 or later
+		//Fix meta box order
+		global $wpdb;
+		$prefix = like_escape($wpdb->base_prefix);
+		$r = $wpdb->get_results("SELECT user_id, meta_key FROM $wpdb->usermeta WHERE meta_key LIKE '{$prefix}%metaboxorder%' OR meta_key LIKE '{$prefix}%meta-box-order%'", ARRAY_N);
+		if ($r) {
+			foreach ($r as &$i) {
+				delete_user_meta($i[0], $i[1]);
+			}
+		}
+	}
 }
 
 function zem_reg_match( $rstr, $str ) {
@@ -84,10 +98,11 @@ function zem_download($url) {
 		// Make the call
 		$rsp = curl_exec( $session );
 		curl_close( $session );
-		if ($rsp === false)
+		if ($rsp === false) {
 			return array(1, "Problem reading data from $url : @$php_errormsg\n");
-		else
+		} else {
 			return array(0, $rsp);
+		}
 	} else if ( ini_get( 'allow_url_fopen' ) ) {
 		return zem_do_get_request($url);
 	}
@@ -111,7 +126,7 @@ function zem_image_upload_url() {
 	return $upload_url;
 }
 
-function zem_upload_image($url, $post, $desc) {
+function zem_upload_image($url) {
 	$upload_dir = zem_image_upload_dir();
 	$filename = wp_unique_filename($upload_dir, basename($url));
 	$new_file = $upload_dir . "/" . basename(urldecode($filename));
@@ -138,11 +153,13 @@ function zem_uploader_enabled() {
 	return zem_get_option("zemanta_image_uploader");
 }
 
-function zem_image_downloader($post_id) {
+function zem_image_downloader($post_content) {
 	global $zem_images_downloaded;
-	if (!zem_uploader_enabled() || $zem_images_downloaded) return false;
-	$post = get_post($post_id);
-	$content = $post->post_content;
+
+	$content = stripslashes($post_content);
+
+	if (!zem_uploader_enabled() || $zem_images_downloaded) return $post_content;
+
 	// zemanta images
 	$nlcontent = str_replace("\n", "", $content);
 	$urls = array();
@@ -156,22 +173,24 @@ function zem_image_downloader($post_id) {
 		$descs[] = $desc[1];
 		$nlcontent = substr($nlcontent, strpos($nlcontent, $matches[0]) + strlen($matches[0]));
 	}
+
 	// other images
 	$nlcontent = str_replace("\n", "", $content);
 	if (zem_get_option("zemanta_image_uploader_promisc")) while (true) {
 		$matches = zem_reg_match('/<img .*?src="[^"]+".*?>/', $nlcontent);
 		if (!sizeof($matches)) break;
 		$srcurl = zem_reg_match('/src="([^"]+)"/', $matches[0]);
-		if (in_array($srcurl, $urls)) continue;
-		$desc = zem_reg_match('/alt="([^"]+)"/', $matches[0]);
-		$urls[] = $srcurl[1];
-		if (strlen($desc[1])) $descs[] = $desc[1];
-		else $descs[] = $srcurl[1];
+		if (!in_array($srcurl[1], $urls)) {
+			$desc = zem_reg_match('/alt="([^"]+)"/', $matches[0]);
+			$urls[] = $srcurl[1];
+			if (strlen($desc[1])) $descs[] = $desc[1];
+			else $descs[] = $srcurl[1];
+		}
 		$nlcontent = substr($nlcontent, strpos($nlcontent, $matches[0]) + strlen($matches[0]));
 	}
+
 	$upload_url = zem_image_upload_url();
-	$_SESSION['dbghaha'] = print_r($urls, 1);
-	if (sizeof($urls) == 0) return true;
+	if (sizeof($urls) == 0) return $post_content;
 	for ($i=0; $i<sizeof($urls); $i++) {
 		$url = $urls[$i];
 		$desc = $descs[$i];
@@ -179,17 +198,16 @@ function zem_image_downloader($post_id) {
 		if (strpos($url, $upload_url) !== false || strpos($url, "http://img.zemanta.com/") !== false) {
 			continue;
 		}
-		$localurl = zem_upload_image($url, $post_id, $desc);
+		$localurl = zem_upload_image($url);
 		if ($localurl !== false) {
 			$content = str_replace($url, $localurl, $content);
 		} else {
 			$_SESSION['image_download_errors'] = true;
 		}
 	}
-	$post->post_content = $content;
 	$zem_images_downloaded = true;
-	wp_update_post($post);
-	return true;
+	$post_content = addslashes($content);
+	return $post_content;
 }
 
 function zem_api_key_fetch() {
@@ -356,7 +374,7 @@ function zem_wp_debug() {
 	else $proxyresult = '<a style="color: red; font-weight: bold;" href="'. zem_proxy_url() .'">Invalid, click here to see the error message</a>';
 
 	?>
-	<p>Api key (if you have one, your wordpress can talk to Zemanta): <strong><?php echo $api_key; ?></strong></p>
+	<p>API key (if you have one, your WordPress can talk to Zemanta): <strong><?php echo $api_key; ?></strong></p>
 	<p>Zemanta response: <strong><?php echo $apiresult; ?></strong></p>
 	<p>Your ajax proxy response: <strong><?php echo $proxyresult; ?></strong></p>
 
@@ -369,8 +387,8 @@ function zem_wp_head() {
 	$api_key = zem_api_key();
 
 	print '<script type="text/javascript">window.ZemantaGetAPIKey = function () { return "' . $api_key . '"; }</script>';
-	print '<script type="text/javascript">window.ZemantaPluginVersion = function () { return "0.6.5"; }</script>';
-	print '<script id="zemanta-loader" type="text/javascript" src="http://fstatic.zemanta.com/plugins/wordpress/2.x/loader.js"></script>';
+	print '<script type="text/javascript">window.ZemantaPluginVersion = function () { return "0.6.6"; }</script>';
+	print '<script id="zemanta-loader" type="text/javascript" src="http://fstatic.zemanta.com/plugins/wordpress/loader.js"></script>';
 };
 
 function zem_config_page() {
@@ -438,7 +456,7 @@ function zem_wp_admin() {
 ?>
 <div class="updated"><p><strong><?php _e('Configuration saved.', 'zemanta' ); ?></strong></p></div>
 <?php
-    }
+	}
 
 	// Now display the options editing screen
 	echo '<div class="wrap">';
@@ -458,18 +476,18 @@ function zem_wp_admin() {
 	</script>
 	<form name="form1" method="post" action="<?php echo str_replace( '%7E', '~', $_SERVER['REQUEST_URI']); ?>">
 		<input type="hidden" name="<?php echo $hidden_field_name; ?>" value="Y">
-        <p>API key is an authentication token that allows Zemanta service to know who you are. We automatically assigned you one when you first used this plug-in.</p>
-        <p>If you would like to use a different API key you can enter it here.</p>
-        <p><?php _e('Zemanta API key:', 'zemanta' ); ?>
+		<p>API key is an authentication token that allows Zemanta service to know who you are. We automatically assigned you one when you first used this plug-in.</p>
+		<p>If you would like to use a different API key you can enter it here.</p>
+		<p><?php _e('Zemanta API key:', 'zemanta' ); ?>
 			<input type="text" name="<?php echo $key_field; ?>" value="<?php echo $key_val; ?>" size="25">
 		</p>
 		<h2>Image uploading</h2>
-        <p>Zemanta gets images from a number of 3rd party hosts (as set in your preferences). To ensure
+		<p>Zemanta gets images from a number of 3rd party hosts (as set in your preferences). To ensure
 		the best experience of your readers you should mirror images on your server. This option turns
 		on automatic mirroring to your server of images included in published post.</p>
 		<p>If you decide not to download images, they can be removed from 3rd party hosts at any time
 		and loading performance can be effected by their reliability.</p>
-        <p><?php _e('Enable Zemanta image uploader:', 'zemanta' ); ?>
+		<p><?php _e('Enable Zemanta image uploader:', 'zemanta' ); ?>
 			<input id="zemsettings_uploader_checkbox" type="checkbox" name="<?php echo $uploader_field; ?>" <?php if ($uploader_val) echo "checked=\"checked\""; ?> onclick="zemsettings_togglepanel('zemsettings_pathinfo', !document.getElementById('zemsettings_advanced_checkbox').checked); return zemsettings_togglepanel('zemsettings_uploader', this.checked);" <?php if ($wp_version <= '2.5') echo 'disabled="disabled" '; ?>/>
 		</p>
 		<?php if ($wp_version <= '2.5') { ?>
@@ -528,97 +546,11 @@ if ( !zem_check_dependencies() ) {
 	return;
 }
 
-// Insert Zemanta to the top-right position if it was not positioned previously
-function zem_check_zemanta_position($metabox_positions) { //Checks if zemanta-wordpress has position
-	if (!$metabox_positions) return false;
-	foreach ($metabox_positions as $position) {
-		foreach (split(',',$position) as $p) {
-			// if old zemanta-sidebar is found, set_default_position will replace it
-			if ($p == "zemanta-sidebar") {
-				return false;
-			}
-			if ($p == "zemanta-wordpress") {
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-function zem_set_default_zemanta_position() {
-	zem_set_default_zemanta_post_position();
-	zem_set_default_zemanta_page_position();
-}
-
-function zem_set_default_zemanta_post_position() {
-	global $table_prefix, $current_user;
-	wp_get_current_user();
-	$metabox_positions = get_usermeta($current_user->ID, $table_prefix . 'metaboxorder_post');
-	if (!zem_check_zemanta_position($metabox_positions)) {
-		if ($metabox_positions) {
-			if (array_key_exists('side', $metabox_positions)) {
-				if ($metabox_positions['side']) {
-					// if found, replace old zemanta-sidebar with zemanta-wordpress
-					if (strpos($metabox_positions['side'], 'zemanta-sidebar') === false) {
-						$metabox_positions['side'] = 'zemanta-wordpress,' . $metabox_positions['side'];
-					} else {
-						if (strpos($metabox_positions['side'], 'zemanta-wordpress') === false) {
-							$metabox_positions['side'] = str_replace('zemanta-sidebar', 'zemanta-wordpress', $metabox_positions['side']);
-						} else {
-							$metabox_positions['side'] = str_replace('zemanta-sidebar', '', $metabox_positions['side']);
-						}
-					}
-				} else {
-					$metabox_positions['side'] = 'zemanta-wordpress';
-				}
-			} else {
-				$metabox_positions['side'] = 'zemanta-wordpress';
-			}
-		} else {
-			$metabox_positions = array('side'=>'zemanta-wordpress');
-		}
-		update_user_option( $current_user->ID, "meta-box-order_post", $metabox_positions );
-	}
-}
-
-function zem_set_default_zemanta_page_position() {
-	global $table_prefix, $current_user;
-	wp_get_current_user();
-	$metabox_positions = get_usermeta($current_user->ID, $table_prefix . 'metaboxorder_page');
-	if (!zem_check_zemanta_position($metabox_positions)) {
-		if ($metabox_positions) {
-			if (array_key_exists('side', $metabox_positions)) {
-				if ($metabox_positions['side']) {
-					// if found, replace old zemanta-sidebar with zemanta-wordpress
-					if (strpos($metabox_positions['side'], 'zemanta-sidebar') === false) {
-						$metabox_positions['side'] = 'zemanta-wordpress,' . $metabox_positions['side'];
-					} else {
-						if (strpos($metabox_positions['side'], 'zemanta-wordpress') === false) {
-							$metabox_positions['side'] = str_replace('zemanta-sidebar', 'zemanta-wordpress', $metabox_positions['side']);
-						} else {
-							$metabox_positions['side'] = str_replace('zemanta-sidebar', '', $metabox_positions['side']);
-						}
-					}
-				} else {
-					$metabox_positions['side'] = 'zemanta-wordpress';
-				}
-			} else {
-				$metabox_positions['side'] = 'zemanta-wordpress';
-			}
-		} else {
-			$metabox_positions = array('side'=>'zemanta-wordpress');
-		}
-		update_user_option( $current_user->ID, "meta-box-order_page", $metabox_positions );
-	}
-}
-
 // Custom Meta Box
 function zem_add_custom_box() {
-  if( function_exists( 'add_meta_box' )) {
-    add_meta_box( 'zemanta-wordpress', __( 'Zemanta', 'myplugin_textdomain' ), 
-                'zem_inner_custom_box', 'post', 'advanced' );
-    add_meta_box( 'zemanta-wordpress', __( 'Zemanta', 'myplugin_textdomain' ), 
-                'zem_inner_custom_box', 'page', 'advanced' );
+	if( function_exists( 'add_meta_box' )) {
+		add_meta_box( 'zemanta-wordpress', __( 'Content Recommendations', 'myplugin_textdomain' ), 'zem_inner_custom_box', 'post', 'side', 'high' );
+		add_meta_box( 'zemanta-wordpress', __( 'Content Recommendations', 'myplugin_textdomain' ), 'zem_inner_custom_box', 'page', 'side', 'high' );
    }
 }
 
@@ -632,11 +564,11 @@ function zem_inner_custom_box() {
 
 session_start();
 if (isset($_SESSION['image_download_errors'])) {
-    function zem_image_download_errors () {
-        echo "<div class='updated fade'><p>". $_SESSION['image_download_error_string'] ."</p></div>";
-    }
-    add_action('admin_notices', 'zem_image_download_errors');
-    unset($_SESSION['image_download_errors']);
+	function zem_image_download_errors () {
+		echo "<div class='updated fade'><p>". $_SESSION['image_download_error_string'] ."</p></div>";
+	}
+	add_action('admin_notices', 'zem_image_download_errors');
+	unset($_SESSION['image_download_errors']);
 }
 
 // Fetch an API key on first run, if it doesn't exist yet or is empty
@@ -670,19 +602,9 @@ if (zem_is_pro()) { // Zemanta Pro
 		}
 
 			add_action('admin_notices', 'zem_api_key_error');
-			add_action( 'admin_menu', 'zem_config_page' );
+			add_action('admin_menu', 'zem_config_page');
 			return;
 	}
-}
-
-//Hook for WP2.7 - MetaBoxes generated with native Wordpress functions to enable storing of their position
-global $wp_version;
-if (substr($wp_version,0,3) >= '2.7') {
-	/* Set Zemanta default position (if it is not already set) */
-	require_once(ABSPATH . '/wp-includes/pluggable.php');
-	zem_set_default_zemanta_position();
-	/* Use the admin_menu action to define the custom boxes */
-	add_action('admin_menu', 'zem_add_custom_box');
 }
 
 // Register actions
@@ -690,7 +612,8 @@ add_action( 'dbx_post_sidebar', 'zem_wp_head', 1 );
 add_action( 'admin_menu', 'zem_config_page' );
 add_action( 'activate_zemanta', 'zem_activate' );
 add_action( 'edit_page_form', 'zem_wp_head', 1 );
-add_filter( 'publish_post', 'zem_image_downloader');
-register_activation_hook(__FILE__, 'zem_activate');
+add_action('admin_menu', 'zem_add_custom_box');
+add_filter( 'content_save_pre', 'zem_image_downloader');
+register_activation_hook(WP_PLUGIN_DIR . '/zemanta/zemanta.php', 'zem_activate');
 
 ?>
