@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
-Version: 0.7.0
+Version: 0.7.1
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 */
@@ -36,7 +36,7 @@ function zem_activate() {
 		$prefix = like_escape($wpdb->base_prefix);
 		$r = $wpdb->get_results("SELECT user_id, meta_key FROM $wpdb->usermeta WHERE meta_key LIKE '{$prefix}%metaboxorder%' OR meta_key LIKE '{$prefix}%meta-box-order%'", ARRAY_N);
 		if ($r) {
-			foreach ($r as &$i) {
+			foreach ($r as $i) {
 				delete_user_meta($i[0], $i[1]);
 			}
 		}
