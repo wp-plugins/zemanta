@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
-Version: 0.7.2
+Version: 0.7.3
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 */
@@ -27,7 +27,7 @@ function zem_check_dependencies() {
 
 function zem_activate() {
 	//Fix proxy permissions
-	chmod(dirname(__FILE__) . "/json-proxy.php", 0755); 
+	@chmod(dirname(__FILE__) . "/json-proxy.php", 0755); 
 
 	//Fixing usermeta 
 	if (function_exists('delete_user_meta')) { //Checking that we are WP3.0 or later
@@ -143,7 +143,7 @@ function zem_upload_image($url) {
 		}
 		fwrite($img, $data);
 		fclose($img);
-		chmod($new_file, 0644);
+		@chmod($new_file, 0644);
 		$upload_url = zem_image_upload_url();
 		return $upload_url . "/" . $filename;
 	}
@@ -387,7 +387,7 @@ function zem_wp_head() {
 	$api_key = zem_api_key();
 
 	print '<script type="text/javascript">window.ZemantaGetAPIKey = function () { return "' . $api_key . '"; }</script>';
-	print '<script type="text/javascript">window.ZemantaPluginVersion = function () { return "0.7.2"; }</script>';
+	print '<script type="text/javascript">window.ZemantaPluginVersion = function () { return "0.7.3"; }</script>';
 	print '<script id="zemanta-loader" type="text/javascript" src="http://fstatic.zemanta.com/plugins/wordpress/loader.js"></script>';
 };
 
@@ -608,12 +608,20 @@ if (zem_is_pro()) { // Zemanta Pro
 }
 
 // Register actions
-add_action( 'dbx_post_sidebar', 'zem_wp_head', 1 );
-add_action( 'admin_menu', 'zem_config_page' );
-add_action( 'activate_zemanta', 'zem_activate' );
+
+// Add the widget to editor pages (post + page)
+add_action( 'edit_form_advanced', 'zem_wp_head', 1 );
 add_action( 'edit_page_form', 'zem_wp_head', 1 );
-add_action('admin_menu', 'zem_add_custom_box');
+
+// Add config to admin
+add_action( 'admin_menu', 'zem_config_page' );
+add_action( 'admin_menu', 'zem_add_custom_box' );
+
+// Image download filter
 add_filter( 'content_save_pre', 'zem_image_downloader');
+
+// Activate plugin
+//add_action( 'activate_zemanta', 'zem_activate' );
 register_activation_hook(WP_PLUGIN_DIR . '/zemanta/zemanta.php', 'zem_activate');
 
 ?>
