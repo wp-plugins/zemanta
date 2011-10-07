@@ -3,7 +3,7 @@ Contributors: zemanta
 Tags: images, links, tags, keywords, articles, seo, embed, enrich, media, semantic web, multimedia, video, youtube, maps, wikipedia, google maps, related, related content, books, zemanta, widget
 Requires at least: 2.1.0
 Tested up to: 3.2.1
-Stable Tag: 0.7.3
+Stable Tag: 0.8.1
 
 Zemanta finds related content while you write your post, so you can add pictures, links and widgets with a single click.
 
@@ -70,6 +70,15 @@ Please take a look at [Zemanta Official FAQ](http://www.zemanta.com/faq/ "Zemant
 2. Post write page with Zemanta, some sample content and suggestions present.
 
 == Changelog ==  
+
+= 0.8.1 =
+
+* Added missing views
+
+= 0.8 =
+
+* Complete code refactoring
+* Image uploading using WP filesystem
 
 = 0.7.3 =
 
