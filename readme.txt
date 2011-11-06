@@ -35,9 +35,9 @@ Get to know [more about Zemanta](http://www.zemanta.com).
 
 == Frequently Asked Questions ==
 
-= How can I insert more then one image? =
+= What languages do you support? =
 
-You can insert multiple images by dragging the image to your blog posts. See our tutorial on [inserting multiple images](http://www.zemanta.com/blog/multiple-images-and-drag-and-drop-with-zemanta/ "Drag and Drop images in Zemanta").
+Right now we support only English, but if you blog in other languages about trademarks and buzzwords Zemanta might still be useful.
 
 = Can Zemanta recommend me my own photos? =
 
@@ -47,18 +47,9 @@ Yes. You can setup Flickr account in Preferences and we'll recommend pictures fr
 
 Yes, see tutorial on [How to: Use Zemanta to recommend articles from your own blog(s)](http://www.zemanta.com/blog/how-to-use-zemanta-to-recommend-articles-from-your-own-blogs/)
 
-= What's this Reblog button that appears in my blog? =
-
-Reblog allows your readers to quickly republish parts of your blog posts on their blogs, while at the same time giving you proper attribution with a backlink. See our [Reblog tutorial](http://www.zemanta.com/reblog/ "Reblog tutorial") for more details.
-
-= What languages do you support? =
-
-Right now we support only English, but if you blog in other languages about trademarks and buzzwords Zemanta might still be useful.
-
 = Do you care about copyright at all? =
 
 Yes, very much. Content that we are recommending is copyright cleared - either licenced as Creative Commons and similar or approved by stock photo providers. However we can only inform you about the license and it is your decision wheter it is acceptable to you.
-
 
 = I have another question =
 
