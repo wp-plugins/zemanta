@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
-Version: 0.8.1
+Version: 0.8.2
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 Contributers: Kevin Miller (http://www.p51labs.com)
@@ -30,7 +30,7 @@ function zemanta_get_api_key()
 
 class Zemanta {
   
-  var $version = '0.8.1';
+  var $version = '0.8.2';
   
   var $api_url = 'http://api.zemanta.com/services/rest/0.0/';
   
@@ -51,10 +51,22 @@ class Zemanta {
     add_action('wp_ajax_zemanta', array(&$this, 'proxy'));
 
     $this->api_key = $this->get_api_key();
+    if (!$this->api_key) 
+    {
+      $this->api_key = $this->fetch_api_key();
+      if ($this->api_key) 
+      {
+        $this->set_api_key($this->api_key);
+      } 
+      else 
+      {
+        add_action('admin_notices', array(&$this, 'warning_no_api_key'));
+      }
+    }
     
     if (!$this->check_dependencies()) 
     {
-      add_action('admin_notices', 'warning');
+      add_action('admin_notices', array(&$this, 'warning'));
     }
   }
     
@@ -78,6 +90,21 @@ class Zemanta {
     $this->render('assets', array(
       'api_key' => $this->api_key
       ,'version' => $this->version
+    ));
+  }
+  
+  /**
+   * warning for no api key
+   *
+   * Display api key warning
+   */
+  public function warning_no_api_key()
+  {
+    $this->render('message', array(
+      'type' => 'error'
+      ,'message' => __('You have no Zemanta API key and the plugin was unable to retrieve one. You can still use Zemanta, '.
+                       'but until the new key is successfully obtained you will not be able to customize the widget or remove '.
+                       'this warning. You may try to deactivate and activate the plugin again to make it retry to obtain the key.')
     ));
   }
   
