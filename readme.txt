@@ -11,6 +11,8 @@ Zemanta finds related content while you write your post, so you can add pictures
 
 Zemanta **recommends content** while you write your post. It helps you enhance it with images, videos, links, and SEO optimized tags. It's blogging on steroids!
 
+[You can use Zemanta as a browser extension (no installation required)](http://www.zemanta.com/download/ "Zemanta download")
+
 Zemanta brings you:
 
 * **Links**: Wikipedia, Amazon, IMDB, YouTube, Google Maps, CrunchBase, RottenTomatoes, MusicBrainz, MySpace, Last.fm, Snooth, Hulu, Wikinvest, Uptake, Muzu.tv, 
@@ -23,7 +25,6 @@ Not having to search for related content saves you time and increases the effici
 
 Amazon affiliate support allows you to quickly link to books, music CD's and DVD's and earn money in the process.
 
-You can try it out without installing the plug-in through [Firefox or Internet Explorer extension](http://www.zemanta.com/download "Zemanta download").
 Get to know [more about Zemanta](http://www.zemanta.com).
 
 == Installation ==
