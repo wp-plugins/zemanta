@@ -1,18 +1,15 @@
 
 <script type="text/javascript">
 //<![CDATA[  
-  window.ZemantaGetAPIKey = function() 
-  { 
+  window.ZemantaGetAPIKey = function () { 
     return '<?php echo $api_key; ?>'; 
   };
   
-  window.ZemantaPluginVersion = function() 
-  { 
+  window.ZemantaPluginVersion = function () { 
     return '<?php echo $version; ?>'; 
   };
   
-  window.ZemantaProxyUrl = function() 
-  { 
+  window.ZemantaProxyUrl = function() { 
     return '<?php echo admin_url('admin-ajax.php'); ?>'; 
   };
 //]]>
