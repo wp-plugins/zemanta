@@ -1,9 +1,9 @@
 === Zemanta ===
 Contributors: zemanta
 Tags: images, links, tags, keywords, articles, seo, embed, enrich, media, semantic web, multimedia, video, youtube, maps, wikipedia, google maps, related, related content, books, zemanta, widget
-Requires at least: 2.7.0
-Tested up to: 3.2.1
-Stable Tag: 0.8.2
+Requires at least: 2.7
+Tested up to: 3.3.1
+Stable Tag: 1.0.7
 
 Zemanta finds related content while you write your post, so you can add pictures, links and widgets with a single click.
 
@@ -11,20 +11,19 @@ Zemanta finds related content while you write your post, so you can add pictures
 
 Zemanta **recommends content** while you write your post. It helps you enhance it with images, videos, links, and SEO optimized tags. It's blogging on steroids!
 
-[You can use Zemanta as a browser extension (no installation required)](http://www.zemanta.com/download/ "Zemanta download")
-
 Zemanta brings you:
 
-* **Links**: Wikipedia, Amazon, IMDB, YouTube, Google Maps, CrunchBase, RottenTomatoes, MusicBrainz, MySpace, Last.fm, Snooth, Hulu, Wikinvest, Uptake, Muzu.tv, 
+* **Links**: Wikipedia, Amazon, IMDB, YouTube, Google Maps, CrunchBase, RottenTomatoes, MusicBrainz, MySpace, Last.fm, Snooth, Hulu, Wikinvest, Uptake, Muzu.tv,
 * **Images**: Getty, Flickr, Wikipedia
 * **Articles**: Major news sources like BBC and CNN and over 30,000 blogs
 
-A simple point and click interface allows you to add only recommendations that you like. Recommended content is blogger friendly with clearly marked licenses (Creative Commons or similar). 
+A simple point and click interface allows you to add only recommendations that you like. Recommended content is blogger friendly with clearly marked licenses (Creative Commons or similar).
 
 Not having to search for related content saves you time and increases the efficiency of your editorial process. You can specify your own blog(s) and Zemanta will recommend links to your related posts!
 
 Amazon affiliate support allows you to quickly link to books, music CD's and DVD's and earn money in the process.
 
+You can try it out without installing the plug-in through [Firefox or Internet Explorer extension](http://www.zemanta.com/download "Zemanta download").
 Get to know [more about Zemanta](http://www.zemanta.com).
 
 == Installation ==
@@ -61,7 +60,30 @@ Please take a look at [Zemanta Official FAQ](http://www.zemanta.com/faq/ "Zemant
 1. Zemanta sidebar
 2. Post write page with Zemanta, some sample content and suggestions present.
 
-== Changelog ==  
+== Changelog ==
+
+= 1.0.7 =
+
+* Image uploader path change message
+
+= 1.0.6 =
+
+* Missing views fix
+
+= 1.0.5 =
+
+* Image uploader fixes
+
+= 1.0.4 =
+
+* Settings Updates
+* Legacy Settings Support
+
+= 1.0.0 =
+
+* Added Settings API and fix for WP < 2.9
+* Re-factor Settings Page
+* Media Updates
 
 = 0.8.2 =
 
@@ -112,8 +134,8 @@ Please take a look at [Zemanta Official FAQ](http://www.zemanta.com/faq/ "Zemant
 = 0.6.3 =
 
 * Fixed bug with image downloader - problems with downloading images with whitespace in image name
-   
-= 0.6.2 =  
+
+= 0.6.2 =
 
 * Speed up of widget loading (using Amazon CloudFront instead of Amazon S3)
 * readme.txt and INSTALL text review
