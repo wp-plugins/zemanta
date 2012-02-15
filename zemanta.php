@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
-Version: 1.0.6
+Version: 1.0.7
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 Contributers: Kevin Miller (http://www.p51labs.com)
@@ -32,7 +32,7 @@ function zemanta_get_api_key()
 
 class Zemanta {
 
-	var $version = '1.0.6';
+	var $version = '1.0.7';
 	var $api_url = 'http://api.zemanta.com/services/rest/0.0/';
 	var $api_key = '';
 	var $options = array();
@@ -42,6 +42,7 @@ class Zemanta {
 	{
 		// initialize update notes shown once on plugin update
 		$this->update_notes['1.0.5'] = __('Please double-check your upload paths in Zemanta Settings, we changed some things that might affect your images.', 'zemanta');
+		$this->update_notes['1.0.7'] = __('Please double-check your upload paths in Zemanta Settings, we changed some things that might affect your images.', 'zemanta');
 
 		add_action('admin_menu', array(&$this, 'add_options'));
 		add_action('admin_menu', array(&$this, 'add_meta_box'));
