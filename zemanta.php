@@ -6,13 +6,14 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
-Version: 1.0.7
+Version: 1.0.8
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 Contributers: Kevin Miller (http://www.p51labs.com)
 */
 
 define('ZEMANTA_PLUGIN_VERSION_OPTION', 'zemanta_plugin_version');
+define('ZEMANTA_PLUGIN_FLASH_META', 'zemanta_plugin_flash');
 
 $zemanta = new Zemanta();
 
@@ -32,40 +33,52 @@ function zemanta_get_api_key()
 
 class Zemanta {
 
-	var $version = '1.0.7';
+	var $version = '1.0.8';
 	var $api_url = 'http://api.zemanta.com/services/rest/0.0/';
 	var $api_key = '';
 	var $options = array();
 	var $update_notes = array();
+	var $flash_data = null;
 
 	public function __construct()
 	{
 		// initialize update notes shown once on plugin update
 		$this->update_notes['1.0.5'] = __('Please double-check your upload paths in Zemanta Settings, we changed some things that might affect your images.', 'zemanta');
 		$this->update_notes['1.0.7'] = __('Please double-check your upload paths in Zemanta Settings, we changed some things that might affect your images.', 'zemanta');
+		$this->update_notes['1.0.8'] = __('Please double-check your upload paths in Zemanta Settings, we changed some things that might affect your images.', 'zemanta');
 
-		add_action('admin_menu', array(&$this, 'add_options'));
-		add_action('admin_menu', array(&$this, 'add_meta_box'));
-		add_action('admin_init', array(&$this, 'register_options'));
-		add_action('admin_menu', array(&$this, 'check_plugin_updated'));
+		add_action('admin_init', array($this, 'init'));
+		add_action('admin_init', array($this, 'register_options'));
+		add_action('admin_menu', array($this, 'add_options'));
+		add_action('admin_menu', array($this, 'add_meta_box'));
 
-		add_filter('content_save_pre', array(&$this, 'image_downloader'));
+		register_activation_hook(dirname(__FILE__) . '/zemanta.php', array($this, 'activate'));
+	}
+	
+	/**
+	* admin_init
+	*
+	* Initialize plugin
+	*
+	*/
+	public function init() 
+	{
+		add_action('wp_ajax_zemanta', array($this, 'proxy'));
+		add_action('edit_form_advanced', array($this, 'assets'), 1);
+		add_action('edit_page_form', array($this, 'assets'), 1);
+		add_filter('content_save_pre', array($this, 'image_downloader'));
 
-		register_activation_hook(dirname(__FILE__) . '/zemanta.php', array(&$this, 'activate'));
+		$this->load_flashdata();
+		add_action('shutdown', array($this, 'save_flashdata'));
 
-		add_action('edit_form_advanced', array(&$this, 'assets'), 1);
-		add_action('edit_page_form', array(&$this, 'assets'), 1);
-
-		add_action('wp_ajax_zemanta', array(&$this, 'proxy'));
-
-		$this->check_plugin_installed();
+		$this->check_plugin_updated();
 		$this->create_options();
 		$this->check_options();
 
-		if (!$this->check_dependencies()) 
-		{
-			add_action('admin_notices', array(&$this, 'warning'));
-		}
+		if (!$this->check_dependencies())
+			add_action('admin_notices', array($this, 'warning'));
+
+		add_action('admin_notices', array($this, 'plugin_update_notice'));
 	}
 
 	/**
@@ -122,15 +135,25 @@ class Zemanta {
 	/**
 	* plugin_update_notice
 	*
-	* Display plugin update notes
+	* Display plugin update notice if available
 	*/
 	public function plugin_update_notice()
 	{
-		if(isset($this->update_notes[$this->version])) {
+		global $pagenow;
+
+		$message = $this->flashdata('plugin_update_notice');
+
+		if($message) 
+		{
+			// keep update message on update and plugins page because they do many redirects, 
+			// so we never know whether user seen the message or not
+			if($pagenow == 'update.php' || ($pagenow == 'plugins.php' && isset($_GET['action'])))
+				$this->keep_flashdata('plugin_update_notice');
+			
 			$this->render('message', array(
-				'type' => 'updated fade',
-				'message' => __($this->update_notes[$this->version], 'zemanta')
-			));
+				'type' => 'updated fade', 
+				'message' => $message)
+			);
 		}
 	}
 
@@ -141,7 +164,7 @@ class Zemanta {
 	*/
 	public function add_options() 
 	{
-		add_options_page(__('Zemanta', 'zemanta'), __('Zemanta', 'zemanta'), 'manage_options', 'zemanta', array(&$this, 'options'));
+		add_options_page(__('Zemanta', 'zemanta'), __('Zemanta', 'zemanta'), 'manage_options', 'zemanta', array($this, 'options'));
 	}
 
 	/**
@@ -172,7 +195,7 @@ class Zemanta {
 				} 
 				else 
 				{
-					add_action('admin_notices', array(&$this, 'warning_no_api_key'));
+					add_action('admin_notices', array($this, 'warning_no_api_key'));
 				}
 			}
 		}
@@ -219,15 +242,15 @@ class Zemanta {
 	*/
 	public function register_options()
 	{
-		register_setting('zemanta_options', 'zemanta_options', array(&$this, 'validate_options'));
+		register_setting('zemanta_options', 'zemanta_options', array($this, 'validate_options'));
 
-		add_settings_section('zemanta_options_plugin', __('Credentials', 'zemanta'), array(&$this, 'callback_options_plugin'), 'zemanta');
-		add_settings_field('zemanta_option_api_key', 'API Key', array(&$this, 'options_set'), 'zemanta', 'zemanta_options_plugin', $this->options['zemanta_option_api_key']);
+		add_settings_section('zemanta_options_plugin', __('Credentials', 'zemanta'), array($this, 'callback_options_plugin'), 'zemanta');
+		add_settings_field('zemanta_option_api_key', 'API Key', array($this, 'options_set'), 'zemanta', 'zemanta_options_plugin', $this->options['zemanta_option_api_key']);
 
-		add_settings_section('zemanta_options_image', __('Image Handling', 'zemanta'), array(&$this, 'callback_options_image'), 'zemanta');
-		add_settings_field('zemanta_option_image_upload', 'Enable image uploader', array(&$this, 'options_set'), 'zemanta', 'zemanta_options_image', $this->options['zemanta_option_image_upload']);
-		add_settings_field('zemanta_option_image_uploader_custom_path', 'Enable custom path', array(&$this, 'options_set'), 'zemanta', 'zemanta_options_image', $this->options['zemanta_option_image_uploader_custom_path']);
-		add_settings_field('zemanta_option_image_upload_dir', 'Store uploads in this folder', array(&$this, 'options_set'), 'zemanta', 'zemanta_options_image', $this->options['zemanta_option_image_upload_dir']);
+		add_settings_section('zemanta_options_image', __('Image Handling', 'zemanta'), array($this, 'callback_options_image'), 'zemanta');
+		add_settings_field('zemanta_option_image_upload', 'Enable image uploader', array($this, 'options_set'), 'zemanta', 'zemanta_options_image', $this->options['zemanta_option_image_upload']);
+		add_settings_field('zemanta_option_image_uploader_custom_path', 'Enable custom path', array($this, 'options_set'), 'zemanta', 'zemanta_options_image', $this->options['zemanta_option_image_uploader_custom_path']);
+		add_settings_field('zemanta_option_image_upload_dir', 'Store uploads in this folder', array($this, 'options_set'), 'zemanta', 'zemanta_options_image', $this->options['zemanta_option_image_upload_dir']);
 	}
 
 	/**
@@ -392,7 +415,7 @@ class Zemanta {
 			if ($response > 0)      
 				return false;
 
-			add_filter('filesystem_method', array(&$this, 'filesystem_method'));
+			add_filter('filesystem_method', array($this, 'filesystem_method'));
 
 			WP_Filesystem();
 
@@ -721,8 +744,8 @@ class Zemanta {
 	{
 		if (function_exists('add_meta_box')) 
 		{
-			add_meta_box('zemanta-wordpress', __('Content Recommendations'), array(&$this, 'shim'), 'post', 'side', 'high');
-			add_meta_box('zemanta-wordpress', __('Content Recommendations'), array(&$this, 'shim'), 'page', 'side', 'high');
+			add_meta_box('zemanta-wordpress', __('Content Recommendations'), array($this, 'shim'), 'post', 'side', 'high');
+			add_meta_box('zemanta-wordpress', __('Content Recommendations'), array($this, 'shim'), 'page', 'side', 'high');
 		}
 	}
 
@@ -929,20 +952,90 @@ class Zemanta {
 	{
 		return ((function_exists('curl_init') || ini_get('allow_url_fopen')) && (function_exists('preg_match') || function_exists('ereg')));
 	}
-	
+
 	/**
-	* check_plugin_installed
+	* load_flashdata
 	*
-	* Checks whether plugin was just installed and adds version information to database
-	* This also used for smooth migration from 0.8.2 to 1.0
+	* Load flashdata that used to be available once and then wiped
 	*	
 	*/
-	protected function check_plugin_installed()
+	public function load_flashdata() 
 	{
-		// this should happen only on plugin installation to suppress update notes
-		if(!get_option('zemanta_options')) {
-			update_option(ZEMANTA_PLUGIN_VERSION_OPTION, $this->version, '', true);
+		global $user_ID;
+
+		$this->flash_data = get_user_option(ZEMANTA_PLUGIN_FLASH_META, $user_ID);
+
+		if(!is_array($this->flash_data))
+			$this->flash_data = array();
+	}
+	
+	/**
+	* save_flashdata
+	*
+	* Save flashdata to user meta
+	*	
+	*/
+	public function save_flashdata() 
+	{
+		global $user_ID;
+		$new_data = array();
+
+		if(is_array($this->flash_data)) {
+			foreach($this->flash_data as $k => $v) {
+				if(substr($k, 0, 4) == 'new#')
+					$new_data['old#' . substr($k, 4)] = $v;
+			}
+
+			update_user_option($user_ID, ZEMANTA_PLUGIN_FLASH_META, $new_data, false);
 		}
+	}
+
+	/**
+	* keep_flashdata
+	*
+	* Keep flashdata key till next time
+	*	
+	*/
+	protected function keep_flashdata($key) {
+		$val = $this->flashdata($key);
+
+		if(!is_null($val))
+			$this->flash_data['new#' . $key] = $val;
+	}
+
+	/**
+	* set_flashdata
+	*
+	* Set flashdata value by key, pass null value to unset flashdata
+	*	
+	*/
+	protected function set_flashdata($key, $value) 
+	{
+		if(is_null($value)) {
+			if(isset($this->flash_data['new#' . $key]))
+				unset($this->flash_data['new#' . $key]);
+			if(isset($this->flash_data['old#' . $key]))
+				unset($this->flash_data['old#' . $key]);
+				
+			return;
+		}
+		$this->flash_data['new#' . $key] = $value;
+	}
+	
+	/**
+	* flashdata
+	*
+	* Get flashdata by key and wipes it immidiately
+	*	
+	*/
+	protected function flashdata($key) 
+	{
+		if(isset($this->flash_data['new#' . $key]))
+			return $this->flash_data['new#' . $key];
+		else if(isset($this->flash_data['old#' . $key]))
+			return $this->flash_data['old#' . $key];
+
+		return null;
 	}
 	
 	/**
@@ -951,18 +1044,25 @@ class Zemanta {
 	* Checks whether plugin update happened and triggers update notice
 	*	
 	*/
-	public function check_plugin_updated()
-	{	
+	protected function check_plugin_updated()
+	{
 		$last_plugin_version = get_option(ZEMANTA_PLUGIN_VERSION_OPTION);
 
-		// it'll trigger only if previous version of plugin were installed before
-		if(!$last_plugin_version || version_compare($last_plugin_version, $this->version, '<'))
+		// setup current version for new plugin installations
+		// zemanta_api_key option presents on older 0.8 versions
+		if(!$last_plugin_version && !get_option('zemanta_api_key')) {
+			update_option(ZEMANTA_PLUGIN_VERSION_OPTION, $this->version, '', true);
+		}
+
+		// it'll trigger only if different version of plugin was installed before
+		if(!$last_plugin_version || version_compare($last_plugin_version, $this->version, '!='))
 		{
 			// save new version string to database to avoid event doubling
 			update_option(ZEMANTA_PLUGIN_VERSION_OPTION, $this->version);
-
-			// show update notice once
-			add_action('admin_notices', array(&$this, 'plugin_update_notice'));
+			
+			// setup flashdata so admin_notices hook could pick it up next time it will be displayed
+			if(isset($this->update_notes[$this->version]))
+				$this->set_flashdata('plugin_update_notice', $this->update_notes[$this->version]);
 		}
 	}
 
