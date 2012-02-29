@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
-Version: 1.0.8
+Version: 1.1.0
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 Contributers: Kevin Miller (http://www.p51labs.com)
@@ -14,6 +14,12 @@ Contributers: Kevin Miller (http://www.p51labs.com)
 
 define('ZEMANTA_PLUGIN_VERSION_OPTION', 'zemanta_plugin_version');
 define('ZEMANTA_PLUGIN_FLASH_META', 'zemanta_plugin_flash');
+
+if(!class_exists('WP_Http')) {
+	require_once(ABSPATH . WPINC . '/class-http.php');
+}
+
+require_once(ABSPATH . 'wp-admin/includes/image.php');
 
 $zemanta = new Zemanta();
 
@@ -33,26 +39,31 @@ function zemanta_get_api_key()
 
 class Zemanta {
 
-	var $version = '1.0.8';
+	var $version = '1.1.0';
 	var $api_url = 'http://api.zemanta.com/services/rest/0.0/';
 	var $api_key = '';
 	var $options = array();
+	var $supported_features = array();
 	var $update_notes = array();
 	var $flash_data = null;
 
 	public function __construct()
 	{
+		global $wp_version;
+		
 		// initialize update notes shown once on plugin update
 		$this->update_notes['1.0.5'] = __('Please double-check your upload paths in Zemanta Settings, we changed some things that might affect your images.', 'zemanta');
 		$this->update_notes['1.0.7'] = __('Please double-check your upload paths in Zemanta Settings, we changed some things that might affect your images.', 'zemanta');
 		$this->update_notes['1.0.8'] = __('Please double-check your upload paths in Zemanta Settings, we changed some things that might affect your images.', 'zemanta');
-
+		
 		add_action('admin_init', array($this, 'init'));
 		add_action('admin_init', array($this, 'register_options'));
 		add_action('admin_menu', array($this, 'add_options'));
 		add_action('admin_menu', array($this, 'add_meta_box'));
-
+		
 		register_activation_hook(dirname(__FILE__) . '/zemanta.php', array($this, 'activate'));
+		
+		$this->supported_features['featured_image'] = version_compare($wp_version, '3.1', '>=') >= 0;
 	}
 	
 	/**
@@ -64,20 +75,21 @@ class Zemanta {
 	public function init() 
 	{
 		add_action('wp_ajax_zemanta', array($this, 'proxy'));
+		add_action('wp_ajax_zemanta_set_featured_image', array($this, 'ajax_zemanta_set_featured_image'));
 		add_action('edit_form_advanced', array($this, 'assets'), 1);
 		add_action('edit_page_form', array($this, 'assets'), 1);
 		add_filter('content_save_pre', array($this, 'image_downloader'));
-
+		
 		$this->load_flashdata();
 		add_action('shutdown', array($this, 'save_flashdata'));
-
+		
 		$this->check_plugin_updated();
 		$this->create_options();
 		$this->check_options();
-
-		if (!$this->check_dependencies())
+		
+		if(!$this->check_dependencies())
 			add_action('admin_notices', array($this, 'warning'));
-
+		
 		add_action('admin_notices', array($this, 'plugin_update_notice'));
 	}
 
@@ -97,11 +109,12 @@ class Zemanta {
 	* Add any assets to the edit page
 	*/
 	public function assets() 
-	{
+	{	
 		$this->render('assets', array(
-			'api_key' => $this->api_key
-			,'version' => $this->version
-			));
+			'api_key' => $this->api_key,
+			'version' => $this->version,
+			'features' => $this->supported_features
+		));
 	}
 
 	/**
@@ -408,19 +421,20 @@ class Zemanta {
 		$file_name = wp_unique_filename($upload_dir, basename($url));
 		$file_path = $upload_dir . '/' . $file_name;
 
-		if (!file_exists($file_path)) 
+		if(!file_exists($file_path)) 
 		{
-			list($response, $data) = $this->download($url);
+			$http_response = wp_remote_get($url, array('timeout' => 10));
 
-			if ($response > 0)      
+			if(is_wp_error($http_response))
 				return false;
+				
+			$data = wp_remote_retrieve_body($http_response);
 
 			add_filter('filesystem_method', array($this, 'filesystem_method'));
 
 			WP_Filesystem();
 
-			if (!$wp_filesystem->put_contents($file_path, $data, FS_CHMOD_FILE)) 
-			{        
+			if (!$wp_filesystem->put_contents($file_path, $data, FS_CHMOD_FILE)) {        
 				return false;
 			}
 
@@ -457,13 +471,10 @@ class Zemanta {
 	{
 		global $zem_images_downloaded, $post;
 
-		$content = stripslashes($post_content);
-
 		if (!$this->is_uploader_enabled() || $zem_images_downloaded)
-		{
 			return $post_content;
-		}
-
+			
+		$content = stripslashes($post_content);
 		$nlcontent = str_replace("\n", "", $content);
 		$urls = array();
 		$descs = array();
@@ -556,48 +567,6 @@ class Zemanta {
 	}
 
 	/**
-	* download
-	*
-	* Download File
-	*
-	* @param string $url Image URL to download
-	*/
-	public function download($url) 
-	{
-		if (function_exists('curl_init')) 
-		{
-			$session = curl_init($url);
-
-			curl_setopt($session, CURLOPT_HEADER, false);
-			curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
-
-			$response = curl_exec($session);
-
-			curl_close($session);
-
-			return $response === false ? array(1, "Problem reading data from $url : @$php_errormsg\n") : array(0, $response);
-		} 
-		else if (ini_get('allow_url_fopen')) 
-		{
-			$fp = @fopen($url, 'rb');
-
-			if (!$fp) 
-			{
-				return array(1, "Problem connecting to $url : @$php_errormsg\n");
-			}
-
-			$response = @stream_get_contents($fp);
-
-			if ($response === false) 
-			{
-				return array(2, "Problem reading data from $url : @$php_errormsg\n");
-			}
-
-			return array(0, $response);
-		}
-	}
-
-	/**
 	* api
 	*
 	* API Call
@@ -606,11 +575,6 @@ class Zemanta {
 	*/
 	public function api($arguments)
 	{
-		if (!class_exists('WP_Http'))
-		{
-			include_once(ABSPATH . WPINC . '/class-http.php');
-		}
-
 		$arguments = array_merge($arguments, array(
 			'api_key'=> $this->api_key
 			));
@@ -702,6 +666,96 @@ class Zemanta {
 		}
 
 		die('');
+	}
+	
+	/**
+	* ajax_error
+	* 
+	* Helper function to throw WP_Errors to ajax as json
+	*/
+	public function ajax_error($wp_error) {
+		if(is_wp_error($wp_error)) {
+			die(json_encode(array(
+				'error' => array(
+					'code' => $wp_error->get_error_code(),
+					'message' => $wp_error->get_error_message(),
+					'data' => $wp_error->get_error_data()
+				)
+			)));
+		}
+	}
+	
+	/**
+	* ajax_zemanta_set_featured_image
+	*
+	* Download and set featured image by URL
+	* @require WordPress 3.1+
+	*/
+	public function ajax_zemanta_set_featured_image()
+	{
+		global $post_ID;
+		
+		if(!isset($this->supported_features['featured_image'])) {
+			$this->ajax_error(new WP_Error(4, __('Featured image feature is not supported on current platform.', 'zemanta')));
+		}
+		
+		$args = wp_parse_args($_REQUEST, array('post_id' => 0, 'image_url' => ''));
+		extract($args);
+		
+		$post_id = (int)$post_id;
+		
+		if(!empty($image_url) && $post_id)
+		{
+			$http_response = wp_remote_get($image_url, array('timeout' => 10));
+
+			if(!is_wp_error($http_response))
+			{
+				$data = wp_remote_retrieve_body($http_response);
+				
+				// throw error if there no data
+				if(empty($data)) {
+					$this->ajax_error(new WP_Error(5, __('Featured image has invalid data.', 'zemanta')));
+				}
+				
+				$upload = wp_upload_bits(basename($image_url), null, $data);
+
+				if(!is_wp_error($upload) && !$upload['error']) 
+				{
+					$filename = $upload['file'];
+					$wp_filetype = wp_check_filetype(basename($filename), null );
+	  				$attachment = array(
+						'post_mime_type' => $wp_filetype['type'],
+						'post_title' => preg_replace('/\.[^.]+$/', '', basename($filename)),
+						'post_content' => '',
+						'post_status' => 'inherit'
+					);
+					$attach_id = wp_insert_attachment($attachment, $filename, $post_id);
+					$attach_data = wp_generate_attachment_metadata($attach_id, $filename);
+					wp_update_attachment_metadata($attach_id, $attach_data);
+					
+					// this is necessary, or _wp_post_thumbnail_html returns broken remove link
+					$post_ID = $post_id;
+					
+					// set_post_thumbnail available only since WordPress 3.1
+					if(set_post_thumbnail($post_id, $attach_id)) {
+						die(json_encode(array(
+								// _wp_post_thumbnail_html is private function but we really need it to behave natively
+								'html' => _wp_post_thumbnail_html($attach_id), // call WPSetThumbnailHTML(html) from javascript
+								'attach_id' => $attach_id // call WPSetThumbnailID(attach_id) from javascript
+							))
+						);
+					} else {
+						$this->ajax_error(new WP_Error(1, __('An unexpected error occurred.', 'zemanta')));
+					}
+				} else {
+					$this->ajax_error(new WP_Error(2, sprintf(__('An upload error occurred: %s', 'zemanta'), $upload->get_error_message())));
+				}
+			} else {
+				$this->ajax_error(new WP_Error(3, sprintf(__('An error occurred while image download: %s', 'zemanta'), $http_response->get_error_message())));
+			}
+		}
+		
+		die(0);
 	}
 
 	/**
