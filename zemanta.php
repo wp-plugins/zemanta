@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
-Version: 1.1.0
+Version: 1.1.2
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 Contributers: Kevin Miller (http://www.p51labs.com)
@@ -39,7 +39,7 @@ function zemanta_get_api_key()
 
 class Zemanta {
 
-	var $version = '1.1.0';
+	var $version = '1.1.2';
 	var $api_url = 'http://api.zemanta.com/services/rest/0.0/';
 	var $api_key = '';
 	var $options = array();
@@ -64,6 +64,9 @@ class Zemanta {
 		register_activation_hook(dirname(__FILE__) . '/zemanta.php', array($this, 'activate'));
 		
 		$this->supported_features['featured_image'] = version_compare($wp_version, '3.1', '>=') >= 0;
+		
+		// check if we use pro plugin and load pro settings
+		$this->check_pro_settings();
 	}
 	
 	/**
@@ -78,7 +81,7 @@ class Zemanta {
 		add_action('wp_ajax_zemanta_set_featured_image', array($this, 'ajax_zemanta_set_featured_image'));
 		add_action('edit_form_advanced', array($this, 'assets'), 1);
 		add_action('edit_page_form', array($this, 'assets'), 1);
-		add_filter('content_save_pre', array($this, 'image_downloader'));
+		add_action('save_post', array($this, 'save_post'), 20);
 		
 		$this->load_flashdata();
 		add_action('shutdown', array($this, 'save_flashdata'));
@@ -222,7 +225,7 @@ class Zemanta {
 	public function create_options()
 	{
 		$wp_upload_dir = wp_upload_dir();
-
+		
 		$this->options = apply_filters('zemanta_options', array(
 		'zemanta_option_api_key' => array(
 			'type' => 'path'
@@ -242,7 +245,7 @@ class Zemanta {
 		,'zemanta_option_image_upload_dir' => array(
 			'type' => 'path'
 			,'field' => 'image_uploader_dir'
-			,'description' => 'The path must be relative to <code>' . str_replace(ABSPATH, '', $wp_upload_dir['basedir']) . '</code>'
+			,'description' => $wp_upload_dir['error'] !== false ? '<code>wp-content/uploads</code>' : ('The path must be relative to <code>' . str_replace(ABSPATH, '', $wp_upload_dir['basedir']) . '</code>')
 			,'default_value' => ''
 			)
 		));
@@ -300,11 +303,13 @@ class Zemanta {
 		}
 
 		$this->render('options-input-' . $option['type'], array(
-			'option' => $this->get_option($option['field'])
-			,'field' => $option['field']
-			,'default_value' => isset($option['default_value']) ? $option['default_value'] : null
-			,'description' => isset($option['description']) ? $option['description'] : null
-			));
+			'option' => $this->get_option($option['field']),
+			'field' => $option['field'],
+			'default_value' => isset($option['default_value']) ? $option['default_value'] : null,
+			'description' => isset($option['description']) ? $option['description'] : null,
+			// @TODO: temporary solution
+			'disabled' => $this->is_pro()
+		));
 	}
 
 	/**
@@ -328,10 +333,11 @@ class Zemanta {
 	*/
 	public function options() 
 	{
-		if ($this->is_pro()) 
-		{
-			return zem_pro_wp_admin();
-		}
+		// @TODO: what's the difference between regular settings and pro settings?
+		// if ($this->is_pro()) 
+		// 		{
+		// 			return zem_pro_wp_admin();
+		// 		}
 
 		if ($this->get_option('image_uploader') == 1 && $this->get_option('image_uploader_dir'))
 		{
@@ -346,7 +352,7 @@ class Zemanta {
 			}
 		}
 
-		if (!$this->api_key) 
+		if(!$this->api_key) 
 		{
 			$this->api_key = $this->fetch_api_key();
 
@@ -354,8 +360,9 @@ class Zemanta {
 		}
 
 		$this->render('options', array(
-			'api_key' => $this->api_key
-			,'api_test' => $this->api_test()
+			'api_key' => $this->api_key,
+			'api_test' => $this->api_test(),
+			'is_pro' => $this->is_pro()
 			));
 	}
 
@@ -367,6 +374,9 @@ class Zemanta {
 	public function image_upload_dir()
 	{
 		$wp_upload_dir = wp_upload_dir();
+		
+		if($wp_upload_dir['error'] !== false)
+			return false;
 
 		if($this->is_uploader_enabled() && $this->is_uploader_custom_path()) 
 		{
@@ -385,6 +395,9 @@ class Zemanta {
 	public function image_upload_url() 
 	{
 		$wp_upload_dir = wp_upload_dir();
+		
+		if($wp_upload_dir['error'] !== false)
+			return false;
 
 		if($this->is_uploader_enabled() && $this->is_uploader_custom_path()) 
 		{
@@ -463,30 +476,34 @@ class Zemanta {
 	}
 
 	/**
-	* image_downloader
+	* save_post
 	*
-	* Image Downloader
+	* Download images if necessary and update post
 	*/
-	public function image_downloader($post_content) 
+	public function save_post($post_id)
 	{
-		global $zem_images_downloaded, $post;
-
-		if (!$this->is_uploader_enabled() || $zem_images_downloaded)
-			return $post_content;
-			
-		$content = stripslashes($post_content);
+		// do not process revisions, autosaves and auto-drafts
+		if(wp_is_post_revision($post_id) || wp_is_post_autosave($post_id) || get_post_status($post_id) == 'auto-draft' || isset($_POST['autosave']))
+			return;
+		
+		$image_upload_dir = $this->image_upload_dir();
+		$image_upload_url = $this->image_upload_url();
+		
+		// do not process if uploader disabled or upload path or url are broken
+		if(!$this->is_uploader_enabled() || !$image_upload_dir || !$image_upload_url)
+			return;
+		
+		$content = stripslashes($_POST['post_content']);
 		$nlcontent = str_replace("\n", "", $content);
 		$urls = array();
 		$descs = array();
-
-		while (true) 
+		
+		while(true) 
 		{
 			$matches = $this->match("/<div[^>]+zemanta-img[^>]+>.+?<\/div>/", $nlcontent);
-
-			if (!sizeof($matches))
-			{
+			
+			if(!sizeof($matches))
 				break;
-			}
 
 			$srcurl = $this->match('/src="([^"]+)"/', $matches[0]);
 			$desc = $this->match('/href="([^"]+)"/', $matches[0]);
@@ -494,76 +511,78 @@ class Zemanta {
 			$descs[] = $desc[1];
 			$nlcontent = substr($nlcontent, strpos($nlcontent, $matches[0]) + strlen($matches[0]));
 		}
-
+		
 		$nlcontent = str_replace("\n", "", $content);
-		if ($this->is_uploader_enabled())
+		
+		while(true) 
 		{
-			while (true) 
+			$matches = $this->match('/<img .*?src="[^"]+".*?>/', $nlcontent);
+			
+			if(!sizeof($matches))
+				break;
+			
+			$srcurl = $this->match('/src="([^"]+)"/', $matches[0]);
+			
+			if(!in_array($srcurl[1], $urls)) 
 			{
-				$matches = $this->match('/<img .*?src="[^"]+".*?>/', $nlcontent);
-
-				if (!sizeof($matches))
-				{
-					break;
-				}
-
-				$srcurl = $this->match('/src="([^"]+)"/', $matches[0]);
-
-				if (!in_array($srcurl[1], $urls)) 
-				{
-					$desc = $this->match('/alt="([^"]+)"/', $matches[0]);
-					$urls[] = $srcurl[1];
-					$descs[] = strlen($desc[1]) ? $desc[1] : $srcurl[1];
-				}
-
-				$nlcontent = substr($nlcontent, strpos($nlcontent, $matches[0]) + strlen($matches[0]));
+				$desc = $this->match('/alt="([^"]+)"/', $matches[0]);
+				$urls[] = $srcurl[1];
+				$descs[] = strlen($desc[1]) ? $desc[1] : $srcurl[1];
 			}
+			
+			$nlcontent = substr($nlcontent, strpos($nlcontent, $matches[0]) + strlen($matches[0]));
 		}
-
+		
 		$upload_url = $this->image_upload_url();
-
-		if (sizeof($urls) == 0)
-		{
-			return $post_content;
-		}
-
-		for ($i = 0; $i < sizeof($urls); $i++) 
+		
+		if(!sizeof($urls))
+			return;
+		
+		for($i = 0, $c = sizeof($urls); $i < $c; $i++)
 		{
 			$url = $urls[$i];
 			$desc = $descs[$i];
-
-			if (strpos($url, $upload_url) !== false || strpos($url, 'http://img.zemanta.com/') !== false) 
-			{
+			
+			if (strpos($url, $upload_url) !== false || strpos($url, 'http://img.zemanta.com/') !== false)
 				continue;
-			}
-
+			
 			$file_name = $this->upload_image($url);
-
+			
 			if ($file_name !== false) 
 			{
-				$localurl = $this->image_upload_url() . '/' . $file_name;
-				$localfile = $this->image_upload_dir() . '/' . $file_name;
+				$localurl = $image_upload_url . '/' . $file_name;
+				$localfile = $image_upload_dir . '/' . $file_name;
 				$wp_filetype = wp_check_filetype($file_name, null);
-
+				
 				$content = str_replace($url, $localurl, $content);
-
+				
 				$attach_id = wp_insert_attachment(array(
 					'post_mime_type' => $wp_filetype['type'],
 					'post_title' => preg_replace('/\.[^.]+$/', '', $file_name),
 					'post_content' => '',
 					'post_status' => 'inherit',
 					'guid' => $localurl
-				), $localfile, $post->ID);
+				), $localfile, $post_id);
 
 				$attach_data = wp_generate_attachment_metadata($attach_id, $localfile);
 				wp_update_attachment_metadata($attach_id, $attach_data);
-			} 
+			}
 		}
-
-		$zem_images_downloaded = true;
-		$post_content = addslashes($content);
-
-		return $post_content;
+		
+		// unhook this function so it doesn't loop infinitely
+		remove_action('save_post', array($this, 'save_post'), 20);
+		
+		// put modified content back to _POST so other plugins can reuse it
+		$_POST['post_content'] = addslashes($content);
+		
+		// update post in database
+		wp_update_post(array(
+			'ID' => $post_id, 
+			'post_content' => $content)
+		);
+		
+		// re-hook this function
+		add_action('save_post', array($this, 'save_post'), 20);
 	}
 
 	/**
@@ -578,15 +597,13 @@ class Zemanta {
 		$arguments = array_merge($arguments, array(
 			'api_key'=> $this->api_key
 			));
-
+		
 		if (!isset($arguments['format']))
 		{
 			$arguments['format'] = 'xml';
 		}
-
-		$request = new WP_Http();
-
-		return $request->request($this->api_url, array('method' => 'POST', 'body' => $arguments));
+		
+		return wp_remote_post($this->api_url, array('method' => 'POST', 'body' => $arguments));
 	}
 
 	/**
@@ -601,14 +618,11 @@ class Zemanta {
 			,'text'=> ''
 			));
 
-		if (is_wp_error($response))
-		{
-			return __('API ERROR');
-		}
-		else
-		{
+		if (is_wp_error($response)) {
+			return __('API ERROR', 'zemanta');
+		} else {
 			$matches = $this->match('/<status>(.+?)<\/status>/', $response['body']);
-
+			
 			return !$matches ? __('Invalid Response') . ': "' . @htmlspecialchars($response) . '"' : $matches[1];
 		}
 	}
@@ -875,32 +889,54 @@ class Zemanta {
 	*
 	* @param string $name Name of option to retrieve
 	*/
-	protected function get_option($name) 
+	protected function get_option($name)
 	{
-		if ($this->is_pro())
-		{
-			return zem_get_pro_option($name);
-		}
-
+		// @TODO: find better solution
+		if($this->is_pro())
+			return $this->get_pro_option($name);
+		
 		$options = get_option('zemanta_options');
 
 		return isset($options[$name]) ? $options[$name] : null;
+	}
+	
+	/**
+	* get_pro_option
+	*
+	* Get pro plugin option
+	* @param string $name Name of option to retrieve from prosettings.php
+	*/
+	protected function get_pro_option($name)
+	{
+		$const_name = 'zemanta_' . $name;
+		
+		// just to keep compatibility
+		if($name == 'api_key')
+			$const_name = strtoupper($const_name);
+		
+		if(defined($const_name)) {
+			$val = constant($const_name);
+			if($const_name == 'zemanta_image_uploader') {
+				return is_bool($val) ? $val : $val === 'on';
+			}
+		}
+		
+		return false;
 	}
 
 	/**
 	* set_option
 	*
-	* Set Option
+	* Set option
 	*
 	* @param string $name Name of option to set
 	* @param string $value Value of option
 	*/
 	protected function set_option($name, $value) 
 	{
+		// @TODO: find better solution
 		if ($this->is_pro())
-		{
-			return zem_set_pro_option($name, $value);
-		}
+			return $this->set_pro_option($name, $value);
 
 		$options = get_option('zemanta_options');
 
@@ -915,15 +951,32 @@ class Zemanta {
 
 		return update_option('zemanta_options', $options);
 	}
+	
+	/**
+	* set_pro_option
+	*
+	* Set pro plugin option
+	*
+	* @param string $name Name of option to set
+	* @param string $value Value of option
+	*/
+	protected function set_pro_option($name, $value) 
+	{
+		// @TODO: implement or drop
+		return true;
+	}
 
 	/**
 	* get_api_key
 	*
 	* Get API Key
 	*/ 
-	public function get_api_key() 
+	public function get_api_key()
 	{
-		return $this->is_pro() ? zem_pro_api_key() : $this->get_option('api_key');
+		if($this->is_pro())
+			return constant('ZEMANTA_API_KEY');
+		
+		return $this->get_option('api_key');
 	}
 
 	/**
@@ -937,7 +990,8 @@ class Zemanta {
 	{
 		if ($this->is_pro())
 		{
-			return zem_set_pro_api_key($api_key);
+			// @TODO: do we really change API key for PRO users?
+			return;// zem_set_pro_api_key($api_key);
 		}
 
 		$this->set_option('api_key', $api_key);
@@ -950,24 +1004,26 @@ class Zemanta {
 	*/
 	protected function is_pro() 
 	{
-		if (defined('api_key') && defined('ZEMANTA_SECRET')) 
-		{
-			return true;
-		}
-
-		if (file_exists(dirname(__FILE__) . '/zemantapro.php'))
-		{
-			require_once(dirname(__FILE__) . "/zemantapro.php");
-		}
-
-		if (function_exists('zem_load_pro'))
-		{
-			zem_load_pro();
-		}
-		else
-		{
+		return defined('ZEMANTA_API_KEY');
+	}
+	
+	/**
+	*
+	* Load Zemanta pro plugin settings
+	*
+	*/
+	protected function check_pro_settings()
+	{
+		if(file_exists(dirname(__FILE__) . '/APIKEY.php'))
+			require_once(dirname(__FILE__) . '/APIKEY.php');
+		
+		if(file_exists(dirname(__FILE__) . '/prosettings.php'))
+			require_once(dirname(__FILE__) . '/prosettings.php');
+		
+		if (!defined("ZEMANTA_API_KEY"))
 			return false;
-		}
+		else
+			return array('api_key' => constant('ZEMANTA_API_KEY'));
 	}
 
 	/**

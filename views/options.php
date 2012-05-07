@@ -29,11 +29,13 @@
 
     <?php do_action('zemanta_options_form'); ?>
 
+	<?php if(!$is_pro) : ?>
     <p class="submit">
       
       <input name="Submit" type="submit" value="<?php esc_attr_e('Save Changes'); ?>" class="button-primary" />
       
     </p>
+	<?php endif; ?>
     
   </form>
   
