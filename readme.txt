@@ -26,7 +26,7 @@ After Zemanta analyzes your content, a simple point and click interface allows y
 
 **Share the Link Love**
 
-### Insert Video Here ###
+[vimeo http://vimeo.com/46745200]
 
 Engaging in **Link Love** is easy with Zemanta. We recommend related posts from other bloggers, you decide which ones you want to link to, and then we let them know that you gave them some love. And of course, other bloggers can and will do that for you as well!
 
