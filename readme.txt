@@ -5,7 +5,7 @@ Requires at least: 2.8
 Tested up to: 3.4
 Stable Tag: 1.2
 
-Zemanta finds related posts, images, links and tags while you write your post. Just pick and choose which you like with a single click! It also recommends your content to other bloggers using Zemanta.
+Zemanta finds related posts, images, links and tags while you write your post. Just pick and choose which you like with a single click!
 
 == Description ==
 
