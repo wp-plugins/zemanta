@@ -1,30 +1,44 @@
-=== Zemanta ===
-Contributors: zemanta
-Tags: images, links, tags, keywords, articles, seo, embed, enrich, media, semantic web, multimedia, video, youtube, maps, wikipedia, google maps, related, related content, books, zemanta, widget
+=== Related Content by Zemanta ===
+Contributors: zemanta, andddd
+Tags: related posts, related posts thumbnails, images, links, tags, keywords, seo, related content, widget, plugin, popular posts
 Requires at least: 2.8
-Tested up to: 3.3.1
-Stable Tag: 1.1.2
+Tested up to: 3.4
+Stable Tag: 1.2
 
-Zemanta finds related content while you write your post, so you can add pictures, links and widgets with a single click.
+Zemanta finds related posts, images, links and tags while you write your post. Just pick and choose which you like with a single click! It also recommends your content to other bloggers using Zemanta.
 
 == Description ==
 
-Zemanta **recommends content** while you write your post. It helps you enhance it with images, videos, links, and SEO optimized tags. It's blogging on steroids!
+Zemanta recommends **related posts**, images, links, and tags from both your blog and our network of over 500,000 blogs. You save time, increase your SEO, and become a member of our network of over 120,000 bloggers.
 
-Zemanta brings you:
+Zemanta offers you:
 
-* **Links**: Wikipedia, Amazon, IMDB, YouTube, Google Maps, CrunchBase, RottenTomatoes, MusicBrainz, MySpace, Last.fm, Snooth, Hulu, Wikinvest, Uptake, Muzu.tv,
-* **Images**: Getty, Flickr, Wikipedia
-* **Articles**: Major news sources like BBC and CNN and over 30,000 blogs
+* **Related posts**: Zemanta will recommend posts from all of your blogs - just click on "My Sources"
+* **Increasing your authority**: Increase your authority by linking to most authoritative blogs on your topic (good for SEO).
+* **Related Images**: Use images from suggestions right in the sidebar while you write. Images are free to use and proper credits are added by default.
+* **Your own images**: Connect your Instagram & Flickr accounts and insert your images directly through Zemanta.
+* **In-Text Links**: Link keywords to relevant sources that help your readers understand your writing.
+* **Tag Suggestions**: Optimize your posts with SEO friendly tags that Zemanta recommends.
+* **Link Love**: Link to other bloggers' that we recommend and in turn, we'll recommend your posts to other bloggers in the same way. Then find out how much love (links, tweets, likes) each of your posts received via Zemanta Dashboard.
+* **Affiliate Support**: If you are are a member of either the Amazon or Fashion Traffic Affiliate program, you can connect your account using Zemanta and easily insert links and images that are automatically tagged with your affiliate ID.
 
-A simple point and click interface allows you to add only recommendations that you like. Recommended content is blogger friendly with clearly marked licenses (Creative Commons or similar).
+After Zemanta analyzes your content, a simple point and click interface allows you to easily insert your related posts, images, links and tags. By not having to search for related content, you will save time and increase the efficiency of your editorial process.
 
-Not having to search for related content saves you time and increases the efficiency of your editorial process. You can specify your own blog(s) and Zemanta will recommend links to your related posts!
+**Share the Link Love**
 
-Amazon affiliate support allows you to quickly link to books, music CD's and DVD's and earn money in the process.
+### Insert Video Here ###
 
-You can try it out without installing the plug-in through [Firefox or Internet Explorer extension](http://www.zemanta.com/download "Zemanta download").
-Get to know [more about Zemanta](http://www.zemanta.com).
+Engaging in **Link Love** is easy with Zemanta. We recommend related posts from other bloggers, you decide which ones you want to link to, and then we let them know that you gave them some love. And of course, other bloggers can and will do that for you as well!
+
+**What our users have to say:**
+
+"Zemanta, in my opinion, is probably the most powerful and useful tool in my personal blogging toolbox." - [Blacknight](http://blog.blacknight.com/use-zemanta-to-improve-your-blogging.html)
+
+"Zemanta is a blogger's best friend." - [IT Pro Portal](http://www.itproportal.com/2012/07/04/the-best-google-chrome-extensions-2012/)
+
+"One of the best free content curation tools available today." - [Content Curation Desktop](http://www.contentcurationdesktop.com/featured-2/zemanta-a-free-customizable-curation-tool/)
+
+**If you would like to see Zemanta in action, check out [our demo](http://www.zemanta.com/demo) or go to [our website](http://www.zemanta.com) to get to know more about us.**
 
 == Installation ==
 
@@ -35,32 +49,44 @@ Get to know [more about Zemanta](http://www.zemanta.com).
 
 == Frequently Asked Questions ==
 
-= What languages do you support? =
-
-Right now we support only English, but if you blog in other languages about trademarks and buzzwords Zemanta might still be useful.
-
-= Can Zemanta recommend me my own photos? =
-
-Yes. You can setup Flickr account in Preferences and we'll recommend pictures from your account.
-
 = Can Zemanta recommend me my own blog posts? =
 
 Yes, see tutorial on [How to: Use Zemanta to recommend articles from your own blog(s)](http://www.zemanta.com/blog/how-to-use-zemanta-to-recommend-articles-from-your-own-blogs/)
 
-= Do you care about copyright at all? =
+= Can Zemanta recommend me my own photos? =
 
-Yes, very much. Content that we are recommending is copyright cleared - either licenced as Creative Commons and similar or approved by stock photo providers. However we can only inform you about the license and it is your decision wheter it is acceptable to you.
+Yes. You can connect your Instagram and Flickr account in Preferences and we'll recommend pictures from your account.
+
+= Do you care about copyright? =
+
+Yes, very much. Content that we are recommending is copyright cleared - either licensed as Creative Commons and similar or approved by stock photo providers. However we can only inform you about the license and it is your decision whether it is acceptable to you.
+
+= How do I get my blog linked to by other bloggers in your network? =
+
+Just add your blog to our database and after it is approved (requirements for approval can be [found here](http://support.zemanta.com/customer/portal/articles/674805-how-to-become-part-of-zemanta-s-related-articles-pool)), if another blogger is writing about something that is relevant to you, we will recommend your article to them. You can find out who has linked to you through your Zemanta dashboard.
 
 = I have another question =
 
-Please take a look at [Zemanta Official FAQ](http://www.zemanta.com/faq/ "Zemanta FAQ").
+Please take a look at [Zemanta Official FAQ](http://support.zemanta.com "Zemanta Support").
 
 == Screenshots ==
 
-1. Zemanta sidebar
-2. Post write page with Zemanta, some sample content and suggestions present.
+1. Detailed view of the widget including the Related Images gallery, article list and the powerful search bar.
+2. WordPress admin new post page where Zemanta is suggesting relevant images, articles, links and tags for the article.
+3. Detailed view of the Article Preview where you get social stats and a neat preview of the article you're about to link to.
+4. The email you receive after another Zemanta user links to one of your articles.
 
 == Changelog ==
+
+= 1.2 =
+* Related articles now feature thumbnails
+* Added Instagram integration
+* Added support for Fashion Traffic affiliate program
+* Ability to share recommended articles via Facebook or Twitter
+* Better settings page
+
+= 1.1.3 =
+* Better errors indication in settings
 
 = 1.1.2 =
 * Fixed duplicating images bug in uploader
