@@ -1,11 +1,11 @@
-=== Related Content by Zemanta ===
+=== Related Posts, Tags and Images by Zemanta ===
 Contributors: zemanta, andddd
-Tags: related, posts, related posts, related posts thumbnails, images, links, tags, keywords, seo, related content, widget, plugin, popular posts
+Tags: related, posts, related posts, related posts thumbnails, images, tags, keywords, seo, related content, widget, plugin, popular posts
 Requires at least: 2.8
 Tested up to: 3.4
 Stable Tag: 1.2.1
 
-Zemanta finds related posts, images, links and tags while you write your post. Just pick and choose which you like with a single click!
+Zemanta finds related posts, images, links and tags while you write your post. Just pick and choose which posts you like with a single click!
 
 == Description ==
 
