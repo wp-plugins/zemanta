@@ -1,9 +1,9 @@
 === Related Content by Zemanta ===
 Contributors: zemanta, andddd
-Tags: related posts, related posts thumbnails, images, links, tags, keywords, seo, related content, widget, plugin, popular posts
+Tags: related, posts, related posts, related posts thumbnails, images, links, tags, keywords, seo, related content, widget, plugin, popular posts
 Requires at least: 2.8
 Tested up to: 3.4
-Stable Tag: 1.2
+Stable Tag: 1.2.1
 
 Zemanta finds related posts, images, links and tags while you write your post. Just pick and choose which you like with a single click!
 
@@ -13,16 +13,16 @@ Zemanta recommends **related posts**, images, links, and tags from both your blo
 
 Zemanta offers you:
 
-* **Related posts**: Zemanta will recommend posts from all of your blogs - just click on "My Sources"
-* **Increasing your authority**: Increase your authority by linking to most authoritative blogs on your topic (good for SEO).
-* **Related Images**: Use images from suggestions right in the sidebar while you write. Images are free to use and proper credits are added by default.
+* **Related posts**: Zemanta will recommend related posts from all of your blogs - just click on "My Sources"
+* **Increasing your authority**: Increase your authority by linking to most authoritative related posts on your topic (good for SEO).
+* **Related Images**: Use related images from suggestions right in the sidebar while you write. Images are free to use and proper credits are added by default.
 * **Your own images**: Connect your Instagram & Flickr accounts and insert your images directly through Zemanta.
 * **In-Text Links**: Link keywords to relevant sources that help your readers understand your writing.
 * **Tag Suggestions**: Optimize your posts with SEO friendly tags that Zemanta recommends.
 * **Link Love**: Link to other bloggers' that we recommend and in turn, we'll recommend your posts to other bloggers in the same way. Then find out how much love (links, tweets, likes) each of your posts received via Zemanta Dashboard.
 * **Affiliate Support**: If you are are a member of either the Amazon or Fashion Traffic Affiliate program, you can connect your account using Zemanta and easily insert links and images that are automatically tagged with your affiliate ID.
 
-After Zemanta analyzes your content, a simple point and click interface allows you to easily insert your related posts, images, links and tags. By not having to search for related content, you will save time and increase the efficiency of your editorial process.
+After Zemanta analyzes your content, a simple point and click interface allows you to easily insert your related posts, images, links and tags. By not having to search for related posts, you will save time and increase the efficiency of your editorial process.
 
 **Share the Link Love**
 
@@ -77,6 +77,9 @@ Please take a look at [Zemanta Official FAQ](http://support.zemanta.com "Zemanta
 4. The email you receive after another Zemanta user links to one of your articles.
 
 == Changelog ==
+
+= 1.2.1 =
+* Fixed a bug concerning the sign in button
 
 = 1.2 =
 * Related articles now feature thumbnails
