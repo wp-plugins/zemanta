@@ -3,9 +3,9 @@
 Copyright (c) 2007 - 2012, Zemanta Ltd.
 The copyrights to the software code in this file are licensed under the (revised) BSD open source license.
 
-Plugin Name: Related Content by Zemanta
+Plugin Name: Related Posts and Images by Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
-Description: Contextual suggestions of links, pictures, related content and SEO tags that makes your blogging fun and efficient.
+Description: Contextual suggestions of related posts, images and tags that makes your blogging fun and efficient.
 Version: 1.2.1
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
