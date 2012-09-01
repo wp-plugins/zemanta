@@ -5,7 +5,7 @@ Requires at least: 2.8
 Tested up to: 3.4
 Stable Tag: 1.2.1
 
-Zemanta finds related posts, related images and tags while you write your post. Pick related posts with a single click!
+Zemanta finds related posts, related images and related tags while you write your post. Pick related posts with a single click!
 
 == Description ==
 
@@ -13,14 +13,14 @@ Zemanta recommends **related posts**, images, links, and tags from both your blo
 
 Zemanta offers you:
 
-* **Related posts**: Zemanta will recommend related posts from all of your blogs - just click on "My Sources"
-* **Increasing your authority**: Increase your authority by linking to most authoritative related posts on your topic (good for SEO).
-* **Related Images**: Use related images right from the sidebar while you write. Images are free to use and proper credits are added by default.
+* **Related posts**: Zemanta will recommend related posts from all of your blogs - just click "My Sources"
+* **Increasing your authority**: Increase your authority by linking to most authoritative related posts (good for SEO).
+* **Related Images**: Use related images right from the sidebar. Images are free to use and proper credits are added by default.
 * **Your own images**: Connect your Instagram & Flickr accounts and insert your images!
-* **Link Love**: Link to other bloggers' that we recommend and in turn, we'll recommend your posts to other bloggers in the same way. Then find out how much love (links, tweets, likes) each of your posts received via Zemanta Dashboard.
-* **Affiliate Programs**: Amazon and Fashion Traffic affiliate programs are supported. You enter your affiliate id and then easily insert links and images.
+* **Link Love**: Link to other bloggers' posts that we recommend and in turn, we'll recommend your posts to other bloggers in the same way. Then find out how much love (links, tweets, likes) each of your posts received via Zemanta Dashboard.
+* **Affiliate Programs**: Amazon and Fashion Traffic are supported. You enter your affiliate id and then easily insert links and images into your posts.
 
-After Zemanta analyzes your post, a simple point and click interface allows you to easily insert related posts, images, links and tags. By not having to search for related posts, you will save time and increase the efficiency of your editorial process.
+After Zemanta analyzes your post, a simple point and click interface allows you to easily insert related posts, related images, links and tags. By not having to search for related posts, you will save time and increase the efficiency of your editorial process.
 
 **Share the Link Love**
 
@@ -43,7 +43,7 @@ Engaging in **Link Love** is easy with Zemanta. We recommend related posts from 
 1. There's a download button on the right side of this text, download the file.
 2. Unzip the file, copy `zemanta` directory to `wp-content/plugins` on your server.
 3. Inside WordPress dasboard there's the `Plugins` menu, click on it. Then click on `Activate` link under Zemanta plug-in.
-4. Start writing a new post. Zemanta will suggest related posts, related images and tags after you write a few sentences!
+4. Start writing a new post. Zemanta will suggest related posts, related images and related tags after you write a few sentences!
 
 == Frequently Asked Questions ==
 
@@ -51,7 +51,7 @@ Engaging in **Link Love** is easy with Zemanta. We recommend related posts from 
 
 Yes, see tutorial on [How to: Use Zemanta to recommend related posts from your own blog(s)](http://www.zemanta.com/blog/how-to-use-zemanta-to-recommend-articles-from-your-own-blogs/)
 
-= Can Zemanta recommend me my own photos? =
+= Can Zemanta recommend me my own related photos? =
 
 Yes. You can connect your Instagram and Flickr account in Preferences and we'll recommend pictures from your account.
 
@@ -61,7 +61,7 @@ Yes, very much. Images that we are recommending are copyright cleared - either l
 
 = How do I get my blog posts linked to by other bloggers in your network? =
 
-Just add your blog to our database and after it is approved (requirements for approval can be [found here](http://support.zemanta.com/customer/portal/articles/674805-how-to-become-part-of-zemanta-s-related-articles-pool)), if another blogger is writing about something that is relevant to you, we will recommend your posts to them. You can find out who has linked to you through your Zemanta dashboard.
+Just add your blog to our database and after it is approved (requirements for approval can be [found here](http://support.zemanta.com/customer/portal/articles/674805-how-to-become-part-of-zemanta-s-related-articles-pool)), if another blogger is writing about something that is relevant to you, we will recommend your posts to them. You can find out who has linked to your posts through your Zemanta dashboard.
 
 = Do I have to create account with Zemanta or can I just install the plug-in? =
 
@@ -74,7 +74,7 @@ Please take a look at [Zemanta Official FAQ](http://support.zemanta.com "Zemanta
 == Screenshots ==
 
 1. Detailed view of the widget including the Related Images gallery, posts list and the powerful search bar.
-2. WordPress admin new post page where Zemanta is suggesting relevant images, posts, links and tags for the post.
+2. WordPress admin new post page where Zemanta is suggesting relevant related images, related posts, links and tags for the post you are writing.
 3. Detailed view of the Post Preview where you get social stats and a neat preview of the post you're about to link to.
 4. The email you receive after another Zemanta user links to one of your posts.
 
@@ -85,8 +85,8 @@ Please take a look at [Zemanta Official FAQ](http://support.zemanta.com "Zemanta
 
 = 1.2 =
 * Related posts now feature thumbnails
-* Added Instagram integration
-* Added support for Fashion Traffic affiliate program
+* Added Instagram integration (for related images)
+* Added support for Fashion Traffic affiliate program (for related images)
 * Ability to share recommended related posts via Facebook or Twitter
 * Better settings page: now with a link to Register / Sign-in into Zemanta service
 
@@ -94,7 +94,7 @@ Please take a look at [Zemanta Official FAQ](http://support.zemanta.com "Zemanta
 * Better errors indication in settings
 
 = 1.1.2 =
-* Fixed duplicating images bug in uploader
+* Fixed duplicating related images bug in uploader
 * Minor changes
 
 = 1.1.0 =
