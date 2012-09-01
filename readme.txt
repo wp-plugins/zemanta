@@ -1,24 +1,24 @@
-=== Related Posts, Tags and Images by Zemanta ===
+=== Related Posts and Images by Zemanta ===
 Contributors: zemanta, andddd
-Tags: related posts, related posts thumbnails, images, tags, seo, related content, widget, plugin, popular posts, similar posts, related, posts
+Tags: related posts, related posts thumbnails, images, seo, related content, widget, plugin, popular posts, similar posts, related, posts
 Requires at least: 2.8
 Tested up to: 3.4
 Stable Tag: 1.2.1
 
-Zemanta finds related posts, related images and related tags while you write your post. Pick related posts with a single click!
+Zemanta finds related posts and related images while you write your post. Pick related posts with a single click!
 
 == Description ==
 
-Zemanta recommends **related posts**, images, links, and tags from both your blog and our index of over 500,000 blogs. You save time, increase your SEO, and become a member of our network of over 120,000 bloggers.
+Zemanta recommends **related posts**, images, links, and tags from both your blog and half a million other blogs. You save time, increase your SEO, and become a member of our network of over 120,000 bloggers.
 
 Zemanta offers you:
 
 * **Related posts**: Zemanta will recommend related posts from all of your blogs - just click "My Sources"
 * **Increasing your authority**: Increase your authority by linking to most authoritative related posts (good for SEO).
-* **Related Images**: Use related images right from the sidebar. Images are free to use and proper credits are added by default.
+* **Related Images**: Use related images right from the sidebar. Related images are free to use and proper credits are added by default.
 * **Your own images**: Connect your Instagram & Flickr accounts and insert your images!
 * **Link Love**: Link to other bloggers' posts that we recommend and in turn, we'll recommend your posts to other bloggers in the same way. Then find out how much love (links, tweets, likes) each of your posts received via Zemanta Dashboard.
-* **Affiliate Programs**: Amazon and Fashion Traffic are supported. You enter your affiliate id and then easily insert links and images into your posts.
+* **Affiliate Programs**: Amazon and Fashion Traffic are supported.
 
 After Zemanta analyzes your post, a simple point and click interface allows you to easily insert related posts, related images, links and tags. By not having to search for related posts, you will save time and increase the efficiency of your editorial process.
 
@@ -47,13 +47,13 @@ Engaging in **Link Love** is easy with Zemanta. We recommend related posts from 
 
 == Frequently Asked Questions ==
 
-= Can Zemanta recommend me my own blog posts as related posts? =
+= Can Zemanta recommend me my own related posts? =
 
 Yes, see tutorial on [How to: Use Zemanta to recommend related posts from your own blog(s)](http://www.zemanta.com/blog/how-to-use-zemanta-to-recommend-articles-from-your-own-blogs/)
 
 = Can Zemanta recommend me my own related photos? =
 
-Yes. You can connect your Instagram and Flickr account in Preferences and we'll recommend pictures from your account.
+Yes. You can connect your Instagram and Flickr account in Preferences and we'll recommend related photos from your account.
 
 = Do you care about copyright? =
 
@@ -61,7 +61,7 @@ Yes, very much. Images that we are recommending are copyright cleared - either l
 
 = How do I get my blog posts linked to by other bloggers in your network? =
 
-Just add your blog to our database and after it is approved (requirements for approval can be [found here](http://support.zemanta.com/customer/portal/articles/674805-how-to-become-part-of-zemanta-s-related-articles-pool)), if another blogger is writing about something that is relevant to you, we will recommend your posts to them. You can find out who has linked to your posts through your Zemanta dashboard.
+Just add your blog to our database and after it is approved (requirements for approval can be [found here](http://support.zemanta.com/customer/portal/articles/674805-how-to-become-part-of-zemanta-s-related-articles-pool)), if another blogger is writing about something that is relevant to you, we will recommend your related posts to them. You can find out who has linked to your posts through your Zemanta dashboard.
 
 = Do I have to create account with Zemanta or can I just install the plug-in? =
 
@@ -84,7 +84,7 @@ Please take a look at [Zemanta Official FAQ](http://support.zemanta.com "Zemanta
 * Fixed a bug concerning the sign in button
 
 = 1.2 =
-* Related posts now feature thumbnails
+* Related posts now feature thumbnails (if a related post does not have a thumbnail, an abstract one is shown)
 * Added Instagram integration (for related images)
 * Added support for Fashion Traffic affiliate program (for related images)
 * Ability to share recommended related posts via Facebook or Twitter
