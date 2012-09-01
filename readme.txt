@@ -1,8 +1,8 @@
 === Related Posts and Images by Zemanta ===
 Contributors: zemanta, andddd
-Tags: related posts, related posts thumbnails, images, seo, related content, widget, plugin, popular posts, similar posts, related, posts
+Tags: related posts, thumbnails, images, seo, related content, widget, plugin, popular, similar, related, posts
 Requires at least: 2.8
-Tested up to: 3.4
+Tested up to: 3.4.1
 Stable Tag: 1.2.1
 
 Zemanta finds related posts and related images while you write your post. Pick related posts with a single click!
@@ -13,11 +13,11 @@ Zemanta recommends **related posts**, images, links, and tags from both your blo
 
 Zemanta offers you:
 
-* **Related posts**: Zemanta will recommend related posts from all of your blogs - just click "My Sources"
+* **Related posts**: Zemanta will recommend related posts from all of your blogs (click "My Sources")
 * **Increasing your authority**: Increase your authority by linking to most authoritative related posts (good for SEO).
 * **Related Images**: Use related images right from the sidebar. Related images are free to use and proper credits are added by default.
 * **Your own images**: Connect your Instagram & Flickr accounts and insert your images!
-* **Link Love**: Link to other bloggers' posts that we recommend and in turn, we'll recommend your posts to other bloggers in the same way. Then find out how much love (links, tweets, likes) each of your posts received via Zemanta Dashboard.
+* **Link Love**: Link to other bloggers' posts that we recommend and in turn, we'll recommend your posts to other bloggers. Then find out how much love (links, tweets, likes) each of your posts received via Zemanta Dashboard.
 * **Affiliate Programs**: Amazon and Fashion Traffic are supported.
 
 After Zemanta analyzes your post, a simple point and click interface allows you to easily insert related posts, related images, links and tags. By not having to search for related posts, you will save time and increase the efficiency of your editorial process.
@@ -61,7 +61,7 @@ Yes, very much. Images that we are recommending are copyright cleared - either l
 
 = How do I get my blog posts linked to by other bloggers in your network? =
 
-Just add your blog to our database and after it is approved (requirements for approval can be [found here](http://support.zemanta.com/customer/portal/articles/674805-how-to-become-part-of-zemanta-s-related-articles-pool)), if another blogger is writing about something that is relevant to you, we will recommend your related posts to them. You can find out who has linked to your posts through your Zemanta dashboard.
+Just add your blog to our database and after it is approved (requirements for approval can be [found here](http://support.zemanta.com/customer/portal/articles/674805-how-to-become-part-of-zemanta-s-related-articles-pool)) We will index your posts and if another blogger is writing about something similar, we will recommend your related posts to them. You can find out who has linked to your posts through your Zemanta dashboard.
 
 = Do I have to create account with Zemanta or can I just install the plug-in? =
 
@@ -126,61 +126,7 @@ Please take a look at [Zemanta Official FAQ](http://support.zemanta.com "Zemanta
 
 = 1.0.0 =
 
-* Added Settings API and fix for WP < 2.9
+* Added Settings API and fix for WordPress < 2.9
 * Re-factor Settings Page
 * Media Updates
-
-= 0.8.2 =
-
-* Report a missing API key and retry fetch until we can obtain one
-* Update oldest supported version to 2.7
-
-= 0.8.1 =
-
-* Added missing views
-
-= 0.8 =
-
-* Complete code refactoring
-* Image uploading using WP filesystem
-
-= 0.7.3 =
-
-* Supress errors on chmod calls to prevent cryptic "unexpected output" warnings
-* Reworked hooks changed in 0.7.2
-
-= 0.7.2 =
-
-* Changed hooks to prevent javascript trying to load twice
-
-= 0.7.1 =
-
-* Fixed bug with WP running on php4
-
-= 0.7.0 =
-
-* Fixed bug with publishing scheduled posts
-* Fixed image downloader
-* Fixed sidebar positioning
-
-= 0.6.6 =
-
-* Compatibility check with WP 3.0
-* Loader location changed
-
-= 0.6.5 =
-
-* Fixed short form php open tags
-
-= 0.6.4 =
-
-* Fixed sidebar positioning problems for the new Zemanta widget
-
-= 0.6.3 =
-
-* Fixed bug with image downloader - problems with downloading images with whitespace in image name
-
-= 0.6.2 =
-
-* Speed up of widget loading (using Amazon CloudFront instead of Amazon S3)
-* readme.txt and INSTALL text review
+* Historical changelog before 1.0 removed
