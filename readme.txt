@@ -2,7 +2,7 @@
 Contributors: zemanta, andddd
 Tags: related posts, related posts thumbnails, images, seo, related content, widget, plugin, popular posts, similar posts, related, posts
 Requires at least: 2.8
-Tested up to: 3.4.2
+Tested up to: 3.5
 Stable Tag: 1.2.1
 
 This plugin finds related posts and related images while you write your post. Pick related posts with a single click!
@@ -47,7 +47,11 @@ Yes! You can connect your Instagram and Flickr account in Preferences and we'll 
 
 Yes, very much. Images that we are recommending are copyright cleared - either Creative Commons and similar or approved by stock photo providers. However we can only inform you about the license and it's your decision to use it or not.
 
-= How do I get my blog posts linked to by other bloggers in your network? =
+= How does Zemanta compare to nRelate, OutBrain and Wordnik related content plugins? =
+
+We let you explicitly pick related posts whereas nRelate, Outbrain and Wordnik offer less control over which related posts are displayed.
+
+= How do I get my blog posts linked by other bloggers in your network? =
 
 Add your blog to our database and after it is approved ([requirements of approval](http://support.zemanta.com/customer/portal/articles/674805-how-to-become-part-of-zemanta-s-related-posts-pool-)). We will index your posts and if another blogger is writing a post about something similar, we will recommend your related posts to them. You can find out who has linked to your posts through your Zemanta dashboard.
 
@@ -76,6 +80,7 @@ Take a look at [Zemanta Official FAQ](http://support.zemanta.com "Zemanta Suppor
 == Changelog ==
 
 = 1.2.1 =
+* Tested with WordPress 3.5 beta 2
 * Fixed a bug concerning the sign-in button
 
 = 1.2 =
