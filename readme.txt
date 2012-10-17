@@ -1,6 +1,6 @@
 === Related Posts & Images by Zemanta ===
 Contributors: zemanta, andddd
-Tags: related posts, related posts thumbnails, images, seo, related content, widget, plugin, popular posts, similar posts, related, posts
+Tags: related posts, posts, related posts thumbnails, images, post, seo, related content, widget, plugin, popular posts, similar posts, related, nrelate, outbrain
 Requires at least: 2.8
 Tested up to: 3.5
 Stable Tag: 1.2.1
@@ -11,9 +11,9 @@ This plugin finds related posts and related images while you write your post. Pi
 
 Add **related posts**, related images and tags from your blog and half a million other blogs. You save time, increase your SEO, and become a member of our network of over 120,000 bloggers!
 
-* **Related posts**: Get recommended related posts from all of your blogs
+* **Related posts**: Get recommended related posts from your own blogs
 * **Increasing your authority**: Increase your authority by linking to most authoritative related posts (good for SEO).
-* **Related Images**: Use related images right from the sidebar. Related images are free to use and proper credits are added by default.
+* **Related Images**: Use related images right from the sidebar. Proper credits are added by default.
 * **Link Love**: Link to other bloggers' related posts that we recommend and in turn, we'll recommend your posts to other bloggers. Then find out how much love (links, tweets, likes) each of your posts received via Zemanta Dashboard.
 
 After Zemanta analyzes your post, a simple point and click interface allows you to easily insert related posts, related images, links and tags. By not having to search for related posts, you will save time and increase the efficiency of your editorial process.
@@ -22,16 +22,16 @@ After Zemanta analyzes your post, a simple point and click interface allows you 
 
 [vimeo http://vimeo.com/46745200]
 
-Engaging in **Link Love** is easy with Zemanta. We recommend related posts from other bloggers, you decide which ones you want to link to. We then let them know that you gave them some love. And of course, other bloggers can and will do that for you as well!
+**Link Love** is easy with Zemanta. We recommend related posts from other bloggers, you decide which ones you want to link to. We then let them know that you gave them some love. And of course, other bloggers can and will do that for you as well!
 
 
 **Get to know more at [Zemanta website](http://www.zemanta.com).**
 
 == Installation ==
 
-1. Unzip the file, copy `zemanta` directory to `wp-content/plugins` on your server.
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Start writing a new post. Zemanta will suggest related posts, related images and related tags after you write a few sentences!
+1. Unzip to `wp-content/plugins` on your server.
+2. Activate through the 'Plugins' menu in WordPress
+3. Start writing a new post! Zemanta will suggest related posts, related images and related tags after you write a few sentences!
 
 == Frequently Asked Questions ==
 
@@ -55,7 +55,7 @@ We let you explicitly pick related posts whereas nRelate, Outbrain and Wordnik o
 
 Add your blog to our database and after it is approved ([requirements of approval](http://support.zemanta.com/customer/portal/articles/674805-how-to-become-part-of-zemanta-s-related-posts-pool-)). We will index your posts and if another blogger is writing a post about something similar, we will recommend your related posts to them. You can find out who has linked to your posts through your Zemanta dashboard.
 
-= Do I have to create account with Zemanta or can I just install the plug-in? =
+= Do I have to create account with Zemanta? =
 
 You don't need an account. However if you log-in to Zemanta Dashboard, you will see who else has used your posts as related posts and get emails about it.
 
@@ -75,7 +75,7 @@ Take a look at [Zemanta Official FAQ](http://support.zemanta.com "Zemanta Suppor
 2. Widget - Related Images, Related Posts and the powerful search bar
 3. WordPress admin new post page where Zemanta is suggesting relevant related images, related posts and tags for the post you are writing.
 4. List of related posts and a neat preview of the post you're about to link to
-5. The email you receive after another Zemanta user uses your post as a related post
+5. The email you receive when another Zemanta user uses your post as a related post
 
 == Changelog ==
 
