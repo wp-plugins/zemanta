@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Related Posts and Images by Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of related posts, images and tags that makes your blogging fun and efficient.
-Version: 1.2.1
+Version: 1.2.2
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 Contributers: Kevin Miller (http://www.p51labs.com), Andrej Mihajlov (http://codeispoetry.ru/)
@@ -39,7 +39,7 @@ function zemanta_get_api_key()
 
 class Zemanta {
 
-	var $version = '1.2.1';
+	var $version = '1.2.2';
 	var $api_url = 'http://api.zemanta.com/services/rest/0.0/';
 	var $api_key = '';
 	var $options = array();
@@ -232,34 +232,42 @@ class Zemanta {
 	public function create_options()
 	{
 		$wp_upload_dir = wp_upload_dir();
+		$options = array(
+			'zemanta_option_api_key' => array(
+				'type' => 'apikey'
+				,'title' => __('Your API key (in case you need to contact support)', 'zemanta')
+				,'field' => 'api_key'
+				,'default_value' => $this->api_key
+				)
+			,'zemanta_option_image_upload' => array(
+				'type' => 'checkbox'
+				,'title' => __('Automatically upload inserted images to your blog', 'zemanta')
+				,'field' => 'image_uploader'
+				//,'description' => __('Using Zemanta image uploader in this way may download copyrighted images to your blog. Make sure you and your blog writers check and understand licenses of each and every image before using them in your blog posts and delete them if they infringe on author\'s rights.')
+				)
+		);
+
+
+		// @deprecated enable custom path only for old users
+		if($this->is_uploader_custom_path()) {
+			$options += array(
+				'zemanta_option_image_uploader_custom_path' => array(
+					'type' => 'checkbox'
+					,'title' => __('Use a custom path to store your images', 'zemanta')
+					,'field' => 'image_uploader_custom_path'
+					//,'description' => __('Use a custom path to store your images?')
+				),
+				'zemanta_option_image_upload_dir' => array(
+					'type' => 'path'
+					//,'title' => ''
+					,'field' => 'image_uploader_dir'
+					,'description' => ($wp_upload_dir['error'] !== false ? 'wp-content/uploads' : str_replace(ABSPATH, '', $wp_upload_dir['basedir'])) . '/'
+					,'default_value' => ''
+				)
+			);
+		}
 		
-		$this->options = apply_filters('zemanta_options', array(
-		'zemanta_option_api_key' => array(
-			'type' => 'apikey'
-			,'title' => __('Your API key', 'zemanta')
-			,'field' => 'api_key'
-			,'default_value' => $this->api_key
-			)
-		,'zemanta_option_image_upload' => array(
-			'type' => 'checkbox'
-			,'title' => __('Automatically upload inserted images to your blog', 'zemanta')
-			,'field' => 'image_uploader'
-			//,'description' => __('Using Zemanta image uploader in this way may download copyrighted images to your blog. Make sure you and your blog writers check and understand licenses of each and every image before using them in your blog posts and delete them if they infringe on author\'s rights.')
-			)
-		,'zemanta_option_image_uploader_custom_path' => array(
-			'type' => 'checkbox'
-			,'title' => __('Use a custom path to store your images', 'zemanta')
-			,'field' => 'image_uploader_custom_path'
-			//,'description' => __('Use a custom path to store your images?')
-			)
-		,'zemanta_option_image_upload_dir' => array(
-			'type' => 'path'
-			//,'title' => ''
-			,'field' => 'image_uploader_dir'
-			,'description' => ($wp_upload_dir['error'] !== false ? 'wp-content/uploads' : str_replace(ABSPATH, '', $wp_upload_dir['basedir'])) . '/'
-			,'default_value' => ''
-			)
-		));
+		$this->options = apply_filters('zemanta_options', $options);
 	}
 
 	/**
@@ -276,8 +284,12 @@ class Zemanta {
 
 		add_settings_section('zemanta_options_image', null, array($this, 'callback_options_dummy'), 'zemanta');
 		add_settings_field('zemanta_option_image_upload', 'Enable image uploader', array($this, 'options_set'), 'zemanta', 'zemanta_options_image', $this->options['zemanta_option_image_upload']);
-		add_settings_field('zemanta_option_image_uploader_custom_path', 'Enable custom path', array($this, 'options_set'), 'zemanta', 'zemanta_options_image', $this->options['zemanta_option_image_uploader_custom_path']);
-		add_settings_field('zemanta_option_image_upload_dir', 'Store uploads in this folder', array($this, 'options_set'), 'zemanta', 'zemanta_options_image', $this->options['zemanta_option_image_upload_dir']);
+		
+		// @deprecated enable for old users only
+		if($this->is_uploader_custom_path()) {
+			add_settings_field('zemanta_option_image_uploader_custom_path', 'Enable custom path', array($this, 'options_set'), 'zemanta', 'zemanta_options_image', $this->options['zemanta_option_image_uploader_custom_path']);
+			add_settings_field('zemanta_option_image_upload_dir', 'Store uploads in this folder', array($this, 'options_set'), 'zemanta', 'zemanta_options_image', $this->options['zemanta_option_image_upload_dir']);
+		}
 	}
 
 	/**
@@ -320,7 +332,9 @@ class Zemanta {
 	*/
 	public function validate_options($input)
 	{
-		$input['image_uploader_dir'] = trim($input['image_uploader_dir'], '\\/');
+		// @deprecated only used by old users
+		if(isset($input['image_uploader_dir']))
+			$input['image_uploader_dir'] = trim($input['image_uploader_dir'], '\\/');
 
 		return $input;
 	}

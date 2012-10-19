@@ -1,12 +1,4 @@
 <style type="text/css">
-
-<?php global $wp_version; if(version_compare($wp_version, '3.3', '>=')) : ?>
-#wpbody {
-  background:transparent url(<?php echo plugins_url('/img/back.jpg', dirname(__FILE__)); ?>) repeat 0% 0%;
-  margin-left: -18px;
-}
-<?php endif; ?>
-
 #wp-zemanta .clearfix:after {
   content: ".";
   display: block;

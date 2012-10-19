@@ -1,32 +1,5 @@
 
 <script type="text/javascript">
-// tracking
-(function () {
-  var logGA = (function () {
-      var ga = document.createElement('script'), 
-        ns = 'ZemantaWordPressNS', ga_prefix = ns ? ns + '.' : '';
-      
-      ga.type = 'text/javascript';
-      ga.async = true;
-      ga.src = ('https:' === document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      
-      document.getElementsByTagName('head')[0].appendChild(ga);
-      
-      if(!window._gaq) {
-        window._gaq = [];
-      }
-      
-      window._gaq.push([ga_prefix + '_setAccount', 'UA-1933864-10']);
-      window._gaq.push([ga_prefix + '_setDomainName', 'none']);
-      
-      return function (d, page) {
-        window._gaq.push([ga_prefix + '_trackPageview', '/tracking' + (page.substring(0, 1) !== '/' ? '/' + page : page)]);
-      };
-    })();
-
-    logGA(null, '/wp-zemanta/views/settings');
-})();
-
 // settings page
 jQuery(document).ready(function ($) {
 
