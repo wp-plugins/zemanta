@@ -30,8 +30,7 @@ $zemanta = new Zemanta();
 *
 * @return string
 */
-function zemanta_get_api_key()
-{
+function zemanta_get_api_key() {
 	global $zemanta;
 
 	return $zemanta->get_api_key();
