@@ -3,7 +3,7 @@
 Copyright (c) 2007 - 2012, Zemanta Ltd.
 The copyrights to the software code in this file are licensed under the (revised) BSD open source license.
 
-Plugin Name: Related Posts and Images by Zemanta
+Plugin Name: Editorial Assistant by Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of related posts, images and tags that makes your blogging fun and efficient.
 Version: 1.2.2
@@ -30,8 +30,7 @@ $zemanta = new Zemanta();
 *
 * @return string
 */
-function zemanta_get_api_key()
-{
+function zemanta_get_api_key() {
 	global $zemanta;
 
 	return $zemanta->get_api_key();
