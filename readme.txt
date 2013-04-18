@@ -1,5 +1,5 @@
 === Editorial Assistant by Zemanta ===
-Contributors: zemanta, andddd
+Contributors: zemanta
 Tags: related posts, posts, thumbnails, images, post, seo, related content, widget, plugin, popular posts, similar posts, related, nrelate, outbrain
 Requires at least: 2.8
 Tested up to: 3.5
