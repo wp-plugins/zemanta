@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Editorial Assistant by Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of related posts, images and tags that makes your blogging fun and efficient.
-Version: 1.2.2
+Version: 1.2.3
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 Contributers: Kevin Miller (http://www.p51labs.com), Andrej Mihajlov (http://codeispoetry.ru/)
@@ -38,7 +38,7 @@ function zemanta_get_api_key() {
 
 class Zemanta {
 
-	var $version = '1.2.2';
+	var $version = '1.2.3';
 	var $api_url = 'http://api.zemanta.com/services/rest/0.0/';
 	var $api_key = '';
 	var $options = array();
@@ -77,7 +77,6 @@ class Zemanta {
 	*/
 	public function init() 
 	{
-		add_action('wp_ajax_zemanta', array($this, 'proxy'));
 		add_action('wp_ajax_zemanta_set_featured_image', array($this, 'ajax_zemanta_set_featured_image'));
 		add_action('edit_form_advanced', array($this, 'assets'), 1);
 		add_action('edit_page_form', array($this, 'assets'), 1);
@@ -380,7 +379,6 @@ class Zemanta {
 
 		$this->render('options', array(
 			'api_key' => $this->api_key,
-			//'api_test' => $this->api_test(),
 			'is_pro' => $this->is_pro()
 			));
 	}
@@ -626,81 +624,6 @@ class Zemanta {
 		return wp_remote_post($this->api_url, array('method' => 'POST', 'body' => $arguments));
 	}
 
-	/**
-	* api_test
-	*
-	* Test the API
-	*/
-	public function api_test() 
-	{
-		$response = $this->api(array(
-			'method' => 'zemanta.suggest'
-			,'text'=> ''
-			));
-
-		if (is_wp_error($response)) {
-			return __('API ERROR', 'zemanta');
-		} else {
-			$matches = $this->match('/<status>(.+?)<\/status>/', $response['body']);
-			
-			return !$matches ? __('Invalid Response', 'zemanta') . ': "' . @htmlspecialchars($response) . '"' : $matches[1];
-		}
-	}
-
-	/**
-	* proxy
-	*
-	* Work as a proxy for the embedded Zemanta widget
-	*/
-	public function proxy() 
-	{
-		if (!isset($_POST['api_key'])) 
-		{
-			header($_SERVER['SERVER_PROTOCOL'] . ' 500');
-			header('Content-Type: text/plain');
-
-			die('No API Key.');
-		}
-
-		$arguments = $_POST;
-
-		$base = dirname(__FILE__);
-
-		if (file_exists($base . '/SECRET.php')) 
-		{
-			require_once($base . '/SECRET.php');
-
-			if (defined('ZEMANTA_SECRET')) 
-			{
-				$arguments['signature'] = ZEMANTA_SECRET . join('', $arguments);
-			}
-		}
-
-		$arguments['format'] = 'json';
-
-		if (isset($arguments['text']) && $arguments['method'] == 'zemanta.suggest')
-		{
-			$arguments['text'] = apply_filters('zemanta_proxy_text_filter', $arguments['text']);
-		}
-
-		$response = $this->api($arguments);
-
-		if ($response['response']['code'] != 200) 
-		{
-			header($_SERVER['SERVER_PROTOCOL'] . ' 500');
-			header('Content-Type: text/plain');
-
-			die($response['response']['message']);
-		}
-		else 
-		{
-			header('Content-Type: text/plain');
-
-			echo $response['body'];
-		}
-
-		die('');
-	}
 	
 	/**
 	* ajax_error
