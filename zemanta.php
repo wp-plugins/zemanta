@@ -273,8 +273,7 @@ class Zemanta {
 	*
 	* Register options with Settings API
 	*/
-	public function register_options()
-	{
+	public function register_options() {
 		register_setting('zemanta_options', 'zemanta_options', array($this, 'validate_options'));
 
 		add_settings_section('zemanta_options_plugin', null, array($this, 'callback_options_dummy'), 'zemanta');
@@ -295,8 +294,7 @@ class Zemanta {
 	*
 	* Dummy callback for add_settings_sections
 	*/
-	public function callback_options_dummy()
-	{
+	public function callback_options_dummy() {
 	}
 
 	/**
@@ -304,11 +302,9 @@ class Zemanta {
 	*
 	* Output the fields for the options
 	*/
-	public function options_set($option = null)
-	{
+	public function options_set($option = null) {
 		// WordPress < 2.9 has a bug where the settings callback is not passed the arguments value so we check for it here.
-		if ($option == null)
-		{
+		if ($option == null) {
 			$option = array_shift($this->options);
 		}
 
@@ -328,8 +324,7 @@ class Zemanta {
 	*
 	* Handle input Validation
 	*/
-	public function validate_options($input)
-	{
+	public function validate_options($input) {
 		// @deprecated only used by old users
 		if(isset($input['image_uploader_dir']))
 			$input['image_uploader_dir'] = trim($input['image_uploader_dir'], '\\/');
@@ -342,27 +337,23 @@ class Zemanta {
 	*
 	* Add configuration page
 	*/
-	public function options() 
-	{
+	public function options() {
 		// @TODO: what's the difference between regular settings and pro settings?
 		// if ($this->is_pro()) 
 		// 		{
 		// 			return zem_pro_wp_admin();
 		// 		}
 
-		if($this->is_uploader_enabled())
-		{
+		if($this->is_uploader_enabled()) {
 			$upload_dir = $this->image_upload_dir();
 			
-			if(is_wp_error($upload_dir))
-			{
+			if(is_wp_error($upload_dir)) {
 				$this->render('message', array(
 					'type' => 'error',
 					'message' => sprintf(__('%s Zemanta will not be able to upload images.', 'zemanta'), $upload_dir->get_error_message())
 				));
 			}
-			else if($this->get_option('image_uploader_dir') && !is_writable($upload_dir))
-			{
+			else if($this->get_option('image_uploader_dir') && !is_writable($upload_dir)) {
 				$this->render('message', array(
 					'type' => 'error',
 					'message' => sprintf(__('Your upload directory (%s) cannot be written to. Zemanta will not be able to upload images there.', 'zemanta'), $upload_dir)
@@ -370,8 +361,7 @@ class Zemanta {
 			} 
 		}
 
-		if(!$this->api_key) 
-		{
+		if(!$this->api_key) {
 			$this->api_key = $this->fetch_api_key();
 
 			$this->set_option('api_key', $this->api_key);
@@ -388,8 +378,7 @@ class Zemanta {
 	*
 	* Add configuration page
 	*/
-	public function image_upload_dir()
-	{
+	public function image_upload_dir() {
 		$wp_upload_dir = wp_upload_dir();
 		
 		if($wp_upload_dir['error'] !== false)
@@ -409,8 +398,7 @@ class Zemanta {
 	*
 	* Add configuration page
 	*/
-	public function image_upload_url() 
-	{
+	public function image_upload_url() {
 		$wp_upload_dir = wp_upload_dir();
 		
 		if($wp_upload_dir['error'] !== false)
@@ -432,8 +420,7 @@ class Zemanta {
 	*
 	* @param string $method File System Method
 */
-	public function filesystem_method($method)
-	{
+	public function filesystem_method($method) {
 		return 'direct';
 	}
 
@@ -442,8 +429,7 @@ class Zemanta {
 	*
 	* Add configuration page
 	*/
-	public function upload_image($url) 
-	{
+	public function upload_image($url) {
 		global $wp_filesystem;
 	
 		$upload_dir = $this->image_upload_dir();
@@ -452,10 +438,10 @@ class Zemanta {
 			return false;
 
 		$file_name = wp_unique_filename($upload_dir, basename($url));
+		$file_name = sanitize_file_name(urldecode($file_name));
 		$file_path = $upload_dir . '/' . $file_name;
 
-		if(!file_exists($file_path)) 
-		{
+		if(!file_exists($file_path)) {
 			$http_response = wp_remote_get($url, array('timeout' => 10));
 
 			if(is_wp_error($http_response))
@@ -481,8 +467,7 @@ class Zemanta {
 	* is_uploader_enabled
 	*
 	*/
-	public function is_uploader_enabled() 
-	{
+	public function is_uploader_enabled() {
 		return $this->get_option('image_uploader');
 	}
 	
@@ -490,8 +475,7 @@ class Zemanta {
 	* is_uploader_custom_path
 	*
 	*/
-	public function is_uploader_custom_path()
-	{
+	public function is_uploader_custom_path() {
 		return $this->get_option('image_uploader_custom_path');
 	}
 
@@ -500,8 +484,7 @@ class Zemanta {
 	*
 	* Download images if necessary and update post
 	*/
-	public function save_post($post_id)
-	{
+	public function save_post($post_id) {
 		// do not process revisions, autosaves and auto-drafts
 		if(wp_is_post_revision($post_id) || wp_is_post_autosave($post_id) || get_post_status($post_id) == 'auto-draft' || isset($_POST['autosave']))
 			return;
@@ -534,30 +517,25 @@ class Zemanta {
 		
 		$nlcontent = str_replace("\n", "", $content);
 		
-		while(true) 
-		{
+		while(true) {
 			$matches = $this->match('/<img .*?src="[^"]+".*?>/', $nlcontent);
 			
 			if(!sizeof($matches))
 				break;
 			
 			$srcurl = $this->match('/src="([^"]+)"/', $matches[0]);
-			
-			if(!in_array($srcurl[1], $urls)) 
-			{
+				if(!in_array($srcurl[1], $urls)) {
 				$desc = $this->match('/alt="([^"]+)"/', $matches[0]);
 				$urls[] = $srcurl[1];
 				$descs[] = strlen($desc[1]) ? $desc[1] : $srcurl[1];
 			}
-			
 			$nlcontent = substr($nlcontent, strpos($nlcontent, $matches[0]) + strlen($matches[0]));
 		}
 		
 		if(!sizeof($urls))
 			return;
 		
-		for($i = 0, $c = sizeof($urls); $i < $c; $i++)
-		{
+		for($i = 0, $c = sizeof($urls); $i < $c; $i++) {
 			$url = $urls[$i];
 			$desc = $descs[$i];
 			
@@ -566,8 +544,7 @@ class Zemanta {
 			
 			$file_name = $this->upload_image($url);
 			
-			if ($file_name !== false) 
-			{
+			if ($file_name !== false) {
 				$localurl = $image_upload_url . '/' . $file_name;
 				$localfile = $image_upload_dir . '/' . $file_name;
 				$wp_filetype = wp_check_filetype($file_name, null);
@@ -610,14 +587,12 @@ class Zemanta {
 	*
 	* @param array $arguments Arguments to pass to the API
 	*/
-	public function api($arguments)
-	{
+	public function api($arguments) {
 		$arguments = array_merge($arguments, array(
 			'api_key'=> $this->api_key
 			));
 		
-		if (!isset($arguments['format']))
-		{
+		if (!isset($arguments['format'])) {
 			$arguments['format'] = 'xml';
 		}
 		
@@ -648,8 +623,7 @@ class Zemanta {
 	* Download and set featured image by URL
 	* @require WordPress 3.1+
 	*/
-	public function ajax_zemanta_set_featured_image()
-	{
+	public function ajax_zemanta_set_featured_image() {
 		global $post_ID;
 		
 		if(!isset($this->supported_features['featured_image'])) {
@@ -661,12 +635,10 @@ class Zemanta {
 		
 		$post_id = (int)$post_id;
 		
-		if(!empty($image_url) && $post_id)
-		{
+		if(!empty($image_url) && $post_id) {
 			$http_response = wp_remote_get($image_url, array('timeout' => 10));
 
-			if(!is_wp_error($http_response))
-			{
+			if(!is_wp_error($http_response)) {
 				$data = wp_remote_retrieve_body($http_response);
 				
 				// throw error if there no data
