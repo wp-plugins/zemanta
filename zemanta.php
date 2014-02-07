@@ -38,7 +38,7 @@ function zemanta_get_api_key() {
 
 class Zemanta {
 
-	var $version = '1.2.3';
+	var $version = '1.2.4';
 	var $api_url = 'http://api.zemanta.com/services/rest/0.0/';
 	var $api_key = '';
 	var $options = array();
