@@ -2,8 +2,8 @@
 Contributors: zemanta
 Tags: related posts, posts, thumbnails, images, post, seo, related content, widget, plugin, popular posts, similar posts, related, nrelate, outbrain
 Requires at least: 2.8
-Tested up to: 3.9
-Stable Tag: 1.2.4
+Tested up to: 3.8.1
+Stable Tag: 1.2.5
 
 This plugin finds related posts and related images while you write your post. Pick related posts manually!
 
@@ -78,6 +78,10 @@ Take a look at [Zemanta Official FAQ](http://support.zemanta.com "Zemanta Suppor
 5. The email you receive when another Zemanta user uses your post as a related post
 
 == Changelog ==
+
+= 1.2.5 =
+* HTTPS dashboard support
+* Moved all links to plugin settings under Settings
 
 = 1.2.4 =
 * Fixed a bug related to uploading images with strange characters in URL

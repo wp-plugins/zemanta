@@ -8,7 +8,7 @@
     <div class="cols clearfix">
       <div class="col-left">
         <div class="video">
-         <iframe src="http://player.vimeo.com/video/46745200?title=0&amp;byline=0&amp;portrait=0" width="100%" height="280px" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+         <iframe src="//player.vimeo.com/video/46745200?title=0&amp;byline=0&amp;portrait=0" width="100%" height="280px" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
         </div>
         <p>
           <a href="http://prefs.zemanta.com/" target="_blank" class="signin-button prefs-signin">Sign In</a>
