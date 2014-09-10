@@ -1,8 +1,8 @@
 === Editorial Assistant by Zemanta ===
 Contributors: zemanta
 Tags: related posts, posts, thumbnails, images, post, seo, related content, widget, plugin, popular posts, similar posts, related, nrelate, outbrain
-Requires at least: 2.8
-Tested up to: 3.8.1
+Requires at least: 3.6
+Tested up to: 4.0
 Stable Tag: 1.2.5
 
 This plugin finds related posts and related images while you write your post. Pick related posts manually!
@@ -26,6 +26,11 @@ After Zemanta analyzes your post, a point and click interface allows you to inse
 
 
 **Get to know more at [Zemanta website](http://www.zemanta.com).**
+
+
+== Terms of Service ==
+
+The plugin source code is released under GPLv2. Usage of plugin is governed by [Zemanta Terms of Service](http://www.zemanta.com/legal/terms-of-service/) and [Zemanta Privacy Policy](http://www.zemanta.com/legal/privacy/).
 
 == Installation ==
 
@@ -64,6 +69,11 @@ You don't need an account. However if you log-in to Zemanta Dashboard, you will 
 "Zemanta, in my opinion, is probably the most powerful and useful tool in my personal blogging toolbox." - [Blacknight](http://blog.blacknight.com/use-zemanta-to-improve-your-blogging.html)
 
 "One of the best free content curation tools available today." - [Content Curation Desktop](http://www.contentcurationdesktop.com/featured-2/zemanta-a-free-customizable-curation-tool/)
+
+= What about Terms of Service and Privacy policy? =
+
+Before using the plugin please read the full version of [Zemanta Terms of Service](http://www.zemanta.com/legal/terms-of-service/) and [Zemanta Privacy Policy](http://www.zemanta.com/legal/privacy/).
+
 
 = More questions? =
 
