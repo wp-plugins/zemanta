@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Editorial Assistant by Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of related posts, images and tags that makes your blogging fun and efficient.
-Version: 1.2.5
+Version: 1.2.6
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 Contributers: Kevin Miller (http://www.p51labs.com), Andrej Mihajlov (http://codeispoetry.ru/)
@@ -36,9 +36,17 @@ function zemanta_get_api_key() {
 	return $zemanta->get_api_key();
 }
 
+// Add getty as provider
+//wp_oembed_add_provider( 'http://gty.im/*', 'http://embed.gettyimages.com/oembed' );
+
+add_action( 'init', 'zemanta_add_oembed_handlers' );
+function zemanta_add_oembed_handlers() {
+	wp_oembed_add_provider( 'http://gty.im/*', 'http://embed.gettyimages.com/oembed' );
+}
+
 class Zemanta {
 
-	var $version = '1.2.5';
+	var $version = '1.2.6';
 	var $api_url = 'http://api.zemanta.com/services/rest/0.0/';
 	var $api_key = '';
 	var $options = array();

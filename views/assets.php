@@ -17,6 +17,8 @@ window.ZemantaProxyUrl = function () {
 	return '<?php echo admin_url('admin-ajax.php'); ?>'; 
 };
 
+window.ZemantaGettySupport = true;
+
 window.ZemantaPluginFeatures = {
 <?php 
 for($i = 0, $keys = array_keys($features), $len = sizeof($keys); $i < $len; $i++) :
@@ -27,4 +29,4 @@ endfor;
 //]]>
 </script>
 
-<script type="text/javascript" id="zemanta-loader" src="//s3.amazonaws.com/static.zemanta.com/plugins/wordpress/loader.js"></script>
+<script type="text/javascript" id="zemanta-loader" src="//static.zemanta.com/plugins/wordpress/loader.js"></script>

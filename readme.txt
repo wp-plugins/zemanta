@@ -89,6 +89,10 @@ Take a look at [Zemanta Official FAQ](http://support.zemanta.com "Zemanta Suppor
 
 == Changelog ==
 
+= 1.2.6 =
+* HTTPS compatibility improvements
+* Getty support
+
 = 1.2.5 =
 * HTTPS dashboard support
 * Moved all links to plugin settings under Settings
