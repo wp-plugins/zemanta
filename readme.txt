@@ -3,7 +3,7 @@ Contributors: zemanta
 Tags: related posts, posts, thumbnails, images, post, seo, related content, widget, plugin, popular posts, similar posts, related, nrelate, outbrain
 Requires at least: 3.6
 Tested up to: 4.0
-Stable Tag: 1.2.5
+Stable Tag: 1.2.6
 
 This plugin finds related posts and related images while you write your post. Pick related posts manually!
 
