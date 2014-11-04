@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Editorial Assistant by Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of related posts, images and tags that makes your blogging fun and efficient.
-Version: 1.2.6
+Version: 1.2.7
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 Contributers: Kevin Miller (http://www.p51labs.com), Andrej Mihajlov (http://codeispoetry.ru/)
@@ -46,7 +46,7 @@ function zemanta_add_oembed_handlers() {
 
 class Zemanta {
 
-	var $version = '1.2.6';
+	var $version = '1.2.7';
 	var $api_url = 'http://api.zemanta.com/services/rest/0.0/';
 	var $api_key = '';
 	var $options = array();
@@ -417,7 +417,6 @@ class Zemanta {
 			$dir = $this->get_option('image_uploader_dir');
 			return untrailingslashit($wp_upload_dir['baseurl'] . '/' . str_replace('\\', '/', $dir));
 		}
-
 		return $wp_upload_dir['url'];
 	}
 
@@ -512,6 +511,7 @@ class Zemanta {
 
 		$image_upload_dir = $this->image_upload_dir();
 		$image_upload_url = $this->image_upload_url();
+		$site_url = get_site_url();
 		
 		// do not process if uploader disabled or upload path or url are broken
 		if(!$this->is_uploader_enabled() || is_wp_error($image_upload_dir) || is_wp_error($image_upload_url))
@@ -560,7 +560,7 @@ class Zemanta {
 			$url = $urls[$i];
 			$desc = $descs[$i];
 			
-			if (strpos($url, $image_upload_url) !== false || strpos($url, 'http://img.zemanta.com/') !== false)
+			if (strpos($url, $site_url) !== false || strpos($url, '//img.zemanta.com/') !== false)
 				continue;
 			
 			$file_name = $this->upload_image($url);
@@ -974,7 +974,14 @@ class Zemanta {
 		{ 
 			global $wpdb;
 
-			$prefix = like_escape($wpdb->base_prefix);
+			if (method_exists($wpdb, 'esc_like')) {
+				// If this is WP 4.0 ?
+				$prefix = $wpdb->esc_like($wpdb->base_prefix);
+			}
+			else {
+				// Fallback on deprecated function
+				$prefix = like_escape($wpdb->base_prefix);
+			}
 
 			$r = $wpdb->get_results("SELECT user_id, meta_key FROM $wpdb->usermeta WHERE meta_key LIKE '{$prefix}%metaboxorder%' OR meta_key LIKE '{$prefix}%meta-box-order%'", ARRAY_N);
 
