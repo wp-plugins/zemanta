@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Editorial Assistant by Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of related posts, images and tags that makes your blogging fun and efficient.
-Version: 1.2.7
+Version: 1.2.8
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 Contributers: Kevin Miller (http://www.p51labs.com), Andrej Mihajlov (http://codeispoetry.ru/)
@@ -46,7 +46,7 @@ function zemanta_add_oembed_handlers() {
 
 class Zemanta {
 
-	var $version = '1.2.7';
+	var $version = '1.2.8';
 	var $api_url = 'http://api.zemanta.com/services/rest/0.0/';
 	var $api_key = '';
 	var $options = array();
@@ -559,11 +559,33 @@ class Zemanta {
 		for($i = 0, $c = sizeof($urls); $i < $c; $i++) {
 			$url = $urls[$i];
 			$desc = $descs[$i];
+
+			$download_url = $url;
 			
-			if (strpos($url, $site_url) !== false || strpos($url, '//img.zemanta.com/') !== false)
-				continue;
+			if (strpos($url, 'http:') === false && strpos($url, 'https:') === false) {
+				// This is a protocol relative url, we have to append http protocol !!!
+				$download_url = "http:$url";
+			}
+
+			$url_data = parse_url($url);
+			$site_url_data = parse_url($site_url);
+
+			$is_default_image = strpos($url, '//img.zemanta.com/') !== false;
+			$is_site_image = strpos($url, $site_url_data['host']) !== false;
 			
-			$file_name = $this->upload_image($url);
+			if ($is_site_image || $is_default_image) { continue; }
+
+			//Sometimes images are on subdomains ... don't upload those images
+			//even if it means we won't upload all the images we promised to
+			//TODO: find a better solution
+			$domain = explode('.', $url_data['host']);
+			$parts = sizeof($domain);
+			if ($parts >= 2) {
+				$domain = $domain[$parts - 2] . '.' . $domain[$parts - 1];
+				if (strpos($site_url, $domain) !== false) { continue; }
+			}
+			
+			$file_name = $this->upload_image($download_url);
 
 			if ($file_name !== false) {
 				$localurl = $image_upload_url . '/' . $file_name;
