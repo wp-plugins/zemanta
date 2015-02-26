@@ -6,7 +6,7 @@ The copyrights to the software code in this file are licensed under the (revised
 Plugin Name: Editorial Assistant by Zemanta
 Plugin URI: http://wordpress.org/extend/plugins/zemanta/
 Description: Contextual suggestions of related posts, images and tags that makes your blogging fun and efficient.
-Version: 1.2.8
+Version: 1.3
 Author: Zemanta Ltd.
 Author URI: http://www.zemanta.com/
 Contributers: Kevin Miller (http://www.p51labs.com), Andrej Mihajlov (http://codeispoetry.ru/)
@@ -14,6 +14,8 @@ Contributers: Kevin Miller (http://www.p51labs.com), Andrej Mihajlov (http://cod
 
 define('ZEMANTA_PLUGIN_VERSION_OPTION', 'zemanta_plugin_version');
 define('ZEMANTA_PLUGIN_FLASH_META', 'zemanta_plugin_flash');
+define("ZEMANTA_UPLOAD_URL", "http://prefs.zemanta.com/api/upload-articles/");
+define("ZEMANTA_ARTICLE_COUNT_URL", "http://prefs.zemanta.com/api/article-count/");
 
 if(!class_exists('WP_Http')) {
 	require_once(ABSPATH . WPINC . '/class-http.php');
@@ -46,7 +48,7 @@ function zemanta_add_oembed_handlers() {
 
 class Zemanta {
 
-	var $version = '1.2.8';
+	var $version = '1.3';
 	var $api_url = 'http://api.zemanta.com/services/rest/0.0/';
 	var $api_key = '';
 	var $options = array();
@@ -54,6 +56,9 @@ class Zemanta {
 	var $update_notes = array();
 	var $flash_data = null;
 	var $menu_slug = null;
+
+	var $articles_uploaded = false;
+	var $articles_count = 0;
 
 	public function __construct()
 	{
@@ -375,9 +380,16 @@ class Zemanta {
 			$this->set_option('api_key', $this->api_key);
 		}
 
+		if (isset($_GET['zemanta_upload_articles'])) {
+			$this->articles_uploaded = $this->upload_articles();
+		}
+		$this->articles_count = $this->article_count();
+		
 		$this->render('options', array(
 			'api_key' => $this->api_key,
-			'is_pro' => $this->is_pro()
+			'is_pro' => $this->is_pro(),
+			'articles_uploaded' => $this->articles_uploaded,
+			'articles_count' => $this->articles_count
 		));
 	}
 
@@ -1213,6 +1225,103 @@ class Zemanta {
 		}
 	}
 
+	// ******* Article upload
+	protected function get_all_attachments() {
+		global $wpdb;
+		$images = $wpdb->get_results("select p1.*, m.meta_value as meta
+			FROM {$wpdb->posts} p1, {$wpdb->posts} p2, {$wpdb->postmeta} m
+			WHERE m.post_id = p1.ID
+				AND p1.post_parent = p2.ID
+				AND p1.post_mime_type LIKE 'image%'
+				AND p2.post_type = 'post'
+				AND m.meta_key = '_wp_attachment_metadata'
+			ORDER BY p2.post_date;"
+		);
+		return $images;
+	}
+
+	protected function article_count() {
+		$http_response = wp_remote_get(ZEMANTA_ARTICLE_COUNT_URL . $this->api_key . '/');
+		if (!is_wp_error($http_response) && wp_remote_retrieve_response_code($http_response) == 200) {
+			$response = json_decode(wp_remote_retrieve_body($http_response));
+			if ($response->status == 'ok') {
+				return $response->articles;
+			}
+		} 
+		return __('Sorry, could not connect to server', 'zemanta');
+	}
+
+	protected function upload_articles() {
+		$media = array();
+		foreach($this->get_all_attachments() as $image) {
+			if (empty($media[$image->post_parent])) {
+				$media[$image->post_parent] = array();
+			}
+			$meta = unserialize($image->meta);
+			$media["$image->post_parent"][] = array(
+				"URL" => $image->guid,
+				"width" => $meta['width'],
+				"height" => $meta['height']
+			);
+		}
+
+		$payload = array(
+			"found" => 0,
+			"posts" => array(),
+		);
+		foreach(get_posts() as $post) {
+			$obj = array(
+				"ID" => $post->ID,
+				"URL" => get_permalink($post->ID), 
+				"attachment_count" => 0,
+				"attachments" => array(),
+				"content" => $post->post_content,
+				"date" => $post->post_date,
+				"excerpt" => $post->post_excerpt,
+				"featured_image" => "",
+				"modified" => $post->post_modified,
+				"post_thumbnail" => null,
+				"slug" => $post->post_name,
+				"status" => $post->post_status,
+				"title" => $post->post_title,
+				"type" => $post->post_type,
+			);
+			if (has_post_thumbnail( $post->ID ) ) {
+				$thumb_id = get_post_thumbnail_id( $post->ID );
+				$meta = wp_get_attachment_metadata($thumb_id);
+				$obj["post_thumbnail"] = array(
+					"URL" => wp_get_attachment_url ($thumb_id),
+					"width" => $meta["width"],
+					"height" => $meta["height"]
+				);
+			}
+			if (!empty($media[$post->ID])) {
+				$obj["attachments"] = $media[$post->ID];
+			}
+
+			$obj["attachment_count"] = sizeof($obj["attachments"]);
+		
+			$payload["posts"][] = $obj;
+		}
+		$payload["found"] = sizeof($payload["posts"]);
+		$payload["posts"] = $payload["posts"];
+
+		$http_response = wp_remote_post(ZEMANTA_UPLOAD_URL, array(
+			"body" => array(
+				"payload" => json_encode($payload),
+				"blog_name" => get_bloginfo('name'),
+				"api_key" => $this->api_key,
+				"feed_url" => get_bloginfo('rss2_url'),
+				"blog_url" => get_bloginfo('url'),
+				"platform" => 'wordpress-ea',
+			)
+		));
+		if (!is_wp_error($http_response) && wp_remote_retrieve_response_code($http_response) == 200) {
+			$response = json_decode(wp_remote_retrieve_body($http_response));
+			return $response->status === 'ok';
+		}
+		return false;
+	}
 }
 
 ?>

@@ -20,6 +20,27 @@
       </div>
     </div>
 
+	<div class="cols clearfix">
+		<h2>Amazing new feature - Upload your history of posts</h2>
+		<p>
+			You can now upload your content! This means you will be reaching out to even more people that write about similar topics – not only new but also old posts will now be suggested in related articles section, to you and to other bloggers.
+		</p>
+		<p>
+			Note: If you have a very large database, it can take some time to upload your articles, so please be patient. =)
+		</p>
+		<?php if (! $articles_uploaded): ?>
+		<form method="get" action="">
+			<fieldset>
+				<input type="hidden" name="page" value="zemanta" />
+				<input class="button-primary" type="submit" name="zemanta_upload_articles" value="<?php _e('Upload my articles to Zemanta','zemanta');?>">
+			</fieldset>
+		</form>
+		<?php else: ?>
+		<p>Your articles are being uploaded.</p>
+		<?php endif; ?>
+		<h3>Number of articles in Zemanta network: <?php echo $articles_count; ?></h3>
+	</div>
+	
   <form action="options.php" method="post" class="settings-form">
     <?php settings_fields('zemanta_options'); ?>
     <?php do_settings_sections('zemanta'); ?>
